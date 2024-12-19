@@ -385,7 +385,7 @@ int main(int argc, char** argv) {
 
  // 3. Display and process XPlane data.
   const auto plane = tsl::profiler::FindPlaneWithName(
-      xspace, "/host:CPU");
+      xspace, "/host:GPU");
   if (plane == nullptr) {
     LOG(ERROR) << "Could not find Host Threads plane.";
     return 1;
