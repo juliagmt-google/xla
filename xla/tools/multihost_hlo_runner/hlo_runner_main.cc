@@ -38,6 +38,11 @@ limitations under the License.
 #include "tsl/platform/init_main.h"
 #include "tsl/platform/logging.h"
 #include "tsl/platform/statusor.h"
+#include "tsl/profiler/lib/profiler_session.h"
+#include "tsl/profiler/protobuf/xplane.pb.h"
+#include "xla/tsl/profiler/utils/xplane_schema.h"
+#include "xla/tsl/profiler/utils/xplane_utils.h"
+#include "xla/tsl/profiler/utils/xplane_visitor.h"
 
 namespace {
 const char* const kUsage = R"(
@@ -349,11 +354,82 @@ int main(int argc, char** argv) {
   if (!parse_ok) {
     LOG(QFATAL) << kUsageString;
   }
+  // 1. Create and start a profiler session if enabled.
+  std::unique_ptr<tsl::ProfilerSession> profiler_session;
+
+  tensorflow::ProfileOptions profile_options = tsl::ProfilerSession::DefaultOptions();
+
+  profiler_session = tsl::ProfilerSession::Create(profile_options);
+  if (!profiler_session->Status().ok()) {
+      LOG(ERROR) << "Failed to create profiler session: " 
+                << profiler_session->Status().message();
+      return 1;
+  }
+  
   absl::Status s = xla::RunMultihostHloRunner(argc, argv, opts);
   if (!s.ok()) {
     std::cerr << s;
     return 1;
   }
+  tensorflow::profiler::XSpace xspace;
+  // 2. Collect profiling data.
+  if (profiler_session) {
+    absl::Status collect_data_status = profiler_session->CollectData(&xspace);
+    if (!collect_data_status.ok()) {
+      LOG(ERROR) << "Profiler data collection failed: " << collect_data_status.message();
+      return 1;
+    }
+    LOG(INFO) << "Profiler data collected.";
+    LOG(INFO) << "XSpace debug:" << xspace.DebugString();
+ }
 
+ // 3. Display and process XPlane data.
+  const auto plane = tsl::profiler::FindPlaneWithName(
+      xspace, "/host:CPU");
+  if (plane == nullptr) {
+    LOG(ERROR) << "Could not find Host Threads plane.";
+    return 1;
+  }
+
+  tsl::profiler::XPlaneVisitor xplane(plane);
+
+  xplane.ForEachLine([&](const tsl::profiler::XLineVisitor& line) {
+    line.ForEachEvent([&](const tsl::profiler::XEventVisitor& event) {
+      if (event.Name() == "MemoryAllocation" || 
+          event.Name() == "MemoryDeallocation") {
+        LOG(INFO) << "  Event: " << event.Name();
+
+        absl::optional<std::string> bytes_allocated;
+        absl::optional<std::string> peak_bytes_in_use;
+        absl::optional<std::string> requested_bytes;
+        absl::optional<std::string> allocation_bytes;
+
+        event.ForEachStat([&](const tsl::profiler::XStatVisitor& stat) {
+          if (stat.Name() == "bytes_allocated") {
+            bytes_allocated = stat.ToString();
+          } else if (stat.Name() == "peak_bytes_in_use") {
+            peak_bytes_in_use = stat.ToString();
+          } else if (stat.Name() == "requested_bytes") {
+            requested_bytes = stat.ToString();
+          } else if (stat.Name() == "allocation_bytes") {
+            allocation_bytes = stat.ToString();
+          }
+        });
+
+        if (bytes_allocated) {
+          LOG(INFO) << "    bytes_allocated: " << *bytes_allocated;
+        }
+        if (peak_bytes_in_use) {
+          LOG(INFO) << "    peak_bytes_in_use: " << *peak_bytes_in_use;
+        }
+        if (requested_bytes) {
+          LOG(INFO) << "    requested_bytes: " << *requested_bytes;
+        }
+        if (allocation_bytes) {
+          LOG(INFO) << "    allocation_bytes: " << *allocation_bytes;
+        }
+      } 
+    });
+  });
   return 0;
 }
