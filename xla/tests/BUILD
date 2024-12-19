@@ -438,10 +438,9 @@ xla_test(
     deps = [
         ":client_library_test_base",
         ":xla_internal_test_main",
+        "//xla:shape_util",
         "//xla:test",
-        "//xla:types",
         "//xla:xla_data_proto_cc",
-        "//xla/client:local_client",
         "//xla/hlo/builder:xla_builder",
         "//xla/hlo/builder:xla_computation",
         "@com_google_absl//absl/status:statusor",
@@ -2430,6 +2429,7 @@ xla_test(
         "//xla:literal",
         "//xla:literal_util",
         "//xla:shape_util",
+        "//xla:types",
         "//xla/service:computation_placer",
         "//xla/service:executable",
         "//xla/service:hlo_module_config",
@@ -2439,6 +2439,7 @@ xla_test(
         "@ml_dtypes//:float8",
         "@tsl//tsl/platform:blocking_counter",
         "@tsl//tsl/platform:env",
+        "@tsl//tsl/platform:statusor",
     ],
 )
 
