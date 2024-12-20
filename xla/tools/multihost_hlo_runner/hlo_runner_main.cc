@@ -359,6 +359,8 @@ int main(int argc, char** argv) {
 
   tensorflow::ProfileOptions profile_options = tsl::ProfilerSession::DefaultOptions();
 
+  LOG(INFO) << "Creating Profile session LOG(INFO).";
+  VLOG(1) << "Creating Profile session VLOG(1)."; 
   profiler_session = tsl::ProfilerSession::Create(profile_options);
   if (!profiler_session->Status().ok()) {
       LOG(ERROR) << "Failed to create profiler session: " 
@@ -379,13 +381,13 @@ int main(int argc, char** argv) {
       LOG(ERROR) << "Profiler data collection failed: " << collect_data_status.message();
       return 1;
     }
-    LOG(INFO) << "Profiler data collected.";
-    LOG(INFO) << "XSpace debug:" << xspace.DebugString();
+    VLOG(1) << "Profiler data collected.";
+    VLOG(1) << "XSpace debug:" << xspace.DebugString();
  }
 
  // 3. Display and process XPlane data.
   const auto plane = tsl::profiler::FindPlaneWithName(
-      xspace, "/host:GPU");
+      xspace, {"/host:GPU", "/host:CPU", "/host:python-tracer", "/host:CUPTI"});
   if (plane == nullptr) {
     LOG(ERROR) << "Could not find Host Threads plane.";
     return 1;
@@ -397,7 +399,7 @@ int main(int argc, char** argv) {
     line.ForEachEvent([&](const tsl::profiler::XEventVisitor& event) {
       if (event.Name() == "MemoryAllocation" || 
           event.Name() == "MemoryDeallocation") {
-        LOG(INFO) << "  Event: " << event.Name();
+        VLOG(1) << "  Event: " << event.Name();
 
         absl::optional<std::string> bytes_allocated;
         absl::optional<std::string> peak_bytes_in_use;
@@ -417,16 +419,16 @@ int main(int argc, char** argv) {
         });
 
         if (bytes_allocated) {
-          LOG(INFO) << "    bytes_allocated: " << *bytes_allocated;
+          VLOG(1) << "    bytes_allocated: " << *bytes_allocated;
         }
         if (peak_bytes_in_use) {
-          LOG(INFO) << "    peak_bytes_in_use: " << *peak_bytes_in_use;
+          VLOG(1) << "    peak_bytes_in_use: " << *peak_bytes_in_use;
         }
         if (requested_bytes) {
-          LOG(INFO) << "    requested_bytes: " << *requested_bytes;
+          VLOG(1) << "    requested_bytes: " << *requested_bytes;
         }
         if (allocation_bytes) {
-          LOG(INFO) << "    allocation_bytes: " << *allocation_bytes;
+          VLOG(1) << "    allocation_bytes: " << *allocation_bytes;
         }
       } 
     });
