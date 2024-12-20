@@ -43,6 +43,7 @@ limitations under the License.
 #include "xla/tsl/profiler/utils/xplane_schema.h"
 #include "xla/tsl/profiler/utils/xplane_utils.h"
 #include "xla/tsl/profiler/utils/xplane_visitor.h"
+#include "xla/tsl/lib/strings/proto_serialization.h"
 
 namespace {
 const char* const kUsage = R"(
@@ -354,84 +355,85 @@ int main(int argc, char** argv) {
   if (!parse_ok) {
     LOG(QFATAL) << kUsageString;
   }
-  // 1. Create and start a profiler session if enabled.
-  std::unique_ptr<tsl::ProfilerSession> profiler_session;
-
-  tensorflow::ProfileOptions profile_options = tsl::ProfilerSession::DefaultOptions();
-
-  LOG(INFO) << "Creating Profile session LOG(INFO).";
-  VLOG(1) << "Creating Profile session VLOG(1)."; 
-  profiler_session = tsl::ProfilerSession::Create(profile_options);
-  if (!profiler_session->Status().ok()) {
-      LOG(ERROR) << "Failed to create profiler session: " 
-                << profiler_session->Status().message();
-      return 1;
-  }
-  
-  absl::Status s = xla::RunMultihostHloRunner(argc, argv, opts);
-  if (!s.ok()) {
-    std::cerr << s;
-    return 1;
-  }
-  tensorflow::profiler::XSpace xspace;
-  // 2. Collect profiling data.
-  if (profiler_session) {
-    absl::Status collect_data_status = profiler_session->CollectData(&xspace);
-    if (!collect_data_status.ok()) {
-      LOG(ERROR) << "Profiler data collection failed: " << collect_data_status.message();
-      return 1;
+  // 1. Create and start a profiler session.
+    std::unique_ptr<tsl::ProfilerSession> profiler_session;
+    tensorflow::ProfileOptions profile_options =
+            tsl::ProfilerSession::DefaultOptions();
+    profiler_session = tsl::ProfilerSession::Create(profile_options);
+    if (!profiler_session->Status().ok()) {
+        LOG(ERROR) << "Failed to create profiler session: "
+                  << profiler_session->Status().message();
+        return 1;
     }
-    VLOG(1) << "Profiler data collected.";
-    VLOG(1) << "XSpace debug:" << xspace.DebugString();
- }
 
- // 3. Display and process XPlane data.
-  const auto plane = tsl::profiler::FindPlaneWithName(
-      xspace, {"/host:GPU", "/host:CPU", "/host:python-tracer", "/host:CUPTI"});
-  if (plane == nullptr) {
-    LOG(ERROR) << "Could not find Host Threads plane.";
-    return 1;
-  }
+    absl::Status s = xla::RunMultihostHloRunner(argc, argv, opts);
+    if (!s.ok()) {
+        std::cerr << s;
+        return 1;
+    }
 
-  tsl::profiler::XPlaneVisitor xplane(plane);
+    // 2. Collect profiling data.
+    tensorflow::profiler::XSpace xspace;
+    if (profiler_session) {
+        absl::Status collect_data_status = profiler_session->CollectData(&xspace);
+        if (!collect_data_status.ok()) {
+            LOG(ERROR) << "Profiler data collection failed: " << collect_data_status.message();
+            return 1;
+        }
+        VLOG(1) << "Profiler data collected.";
+        VLOG(1) << "XSpace debug:" << xspace.DebugString();
+    }
 
-  xplane.ForEachLine([&](const tsl::profiler::XLineVisitor& line) {
-    line.ForEachEvent([&](const tsl::profiler::XEventVisitor& event) {
-      if (event.Name() == "MemoryAllocation" || 
-          event.Name() == "MemoryDeallocation") {
-        VLOG(1) << "  Event: " << event.Name();
+    // 3. Find and process the Host Threads XPlane.
+    std::vector<const tsl::profiler::XPlane*> planes = tsl::profiler::FindPlanesWithNames(
+            xspace, {tsl::profiler::kHostThreadsPlaneName, tsl::profiler::kCuptiDriverApiPlaneName, tsl::profiler::kMetadataPlaneName,
+                     tsl::profiler::kPythonTracerPlaneName});
 
-        absl::optional<std::string> bytes_allocated;
-        absl::optional<std::string> peak_bytes_in_use;
-        absl::optional<std::string> requested_bytes;
-        absl::optional<std::string> allocation_bytes;
+    for (const tsl::profiler::XPlane* plane : planes) {
+        if (!plane) {
+            VLOG(1) << "Could not find one of the specified planes.";
+            continue;
+        }
 
-        event.ForEachStat([&](const tsl::profiler::XStatVisitor& stat) {
-          if (stat.Name() == "bytes_allocated") {
-            bytes_allocated = stat.ToString();
-          } else if (stat.Name() == "peak_bytes_in_use") {
-            peak_bytes_in_use = stat.ToString();
-          } else if (stat.Name() == "requested_bytes") {
-            requested_bytes = stat.ToString();
-          } else if (stat.Name() == "allocation_bytes") {
-            allocation_bytes = stat.ToString();
-          }
+        tsl::profiler::XPlaneVisitor xplane(plane);
+
+        xplane.ForEachLine([&](const tsl::profiler::XLineVisitor& line) {
+            line.ForEachEvent([&](const tsl::profiler::XEventVisitor& event) {
+                if (event.Name() == "MemoryAllocation" || event.Name() == "MemoryDeallocation") {
+                    VLOG(1) << "  Event: " << event.Name();
+
+                    absl::optional<int64_t> bytes_allocated;
+                    absl::optional<int64_t> peak_bytes_in_use;
+                    absl::optional<int64_t> requested_bytes;
+                    absl::optional<int64_t> allocation_bytes;
+
+                    event.ForEachStat([&](const tsl::profiler::XStatVisitor& stat) {
+                        if (stat.Name() == tsl::profiler::GetStatTypeStr(tsl::profiler::StatType::kBytesAllocated)) {
+                            bytes_allocated = stat.IntValue();
+                        } else if (stat.Name() == tsl::profiler::GetStatTypeStr(tsl::profiler::StatType::kPeakBytesInUse)) {
+                            peak_bytes_in_use = stat.IntValue();
+                        } else if (stat.Name() == tsl::profiler::GetStatTypeStr(tsl::profiler::StatType::kRequestedBytes)) {
+                            requested_bytes = stat.IntValue();
+                        } else if (stat.Name() == tsl::profiler::GetStatTypeStr(tsl::profiler::StatType::kAllocationBytes)) {
+                            allocation_bytes = stat.IntValue();
+                        }
+                    });
+
+                    if (bytes_allocated.has_value()) {
+                        VLOG(1) << "    bytes_allocated: " << *bytes_allocated;
+                    }
+                    if (peak_bytes_in_use.has_value()) {
+                        VLOG(1) << "    peak_bytes_in_use: " << *peak_bytes_in_use;
+                    }
+                    if (requested_bytes.has_value()) {
+                        VLOG(1) << "    requested_bytes: " << *requested_bytes;
+                    }
+                    if (allocation_bytes.has_value()) {
+                        VLOG(1) << "    allocation_bytes: " << *allocation_bytes;
+                    }
+                }
+            });
         });
-
-        if (bytes_allocated) {
-          VLOG(1) << "    bytes_allocated: " << *bytes_allocated;
-        }
-        if (peak_bytes_in_use) {
-          VLOG(1) << "    peak_bytes_in_use: " << *peak_bytes_in_use;
-        }
-        if (requested_bytes) {
-          VLOG(1) << "    requested_bytes: " << *requested_bytes;
-        }
-        if (allocation_bytes) {
-          VLOG(1) << "    allocation_bytes: " << *allocation_bytes;
-        }
-      } 
-    });
-  });
+    }
   return 0;
 }
