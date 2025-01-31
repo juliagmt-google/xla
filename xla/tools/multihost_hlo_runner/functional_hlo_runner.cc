@@ -1159,7 +1159,7 @@ FunctionalHloRunner::RunInternal(
     std::cout << "### after (repeat == 0 || running_options.recreate_buffers_between_repeats)" << std::endl;
     if (repeat == running_options.num_repeats - 1) {
       execute_options.untuple_result = default_untuple_result;
-      if (running_options.profiler != nullptr) {
+      if (running_options.profiler) {
         std::cout << "### Before running_options.profiler->CreateSession();" << std::endl;
         running_options.profiler->CreateSession();
         std::cout << "### After running_options.profiler->CreateSession();" << std::endl;
@@ -1208,7 +1208,7 @@ FunctionalHloRunner::RunInternal(
                                         running_options.module_output_mode,
                                         running_options.log_input_output()));
   std::cout << "### After FetchAndLogOutput" << std::endl;
-  if (running_options.profiler != nullptr) {
+  if (running_options.profiler) {
     std::cout << "### Before running_options.profiler->UploadSession();" << std::endl;
     running_options.profiler->UploadSession();
     std::cout << "### After running_options.profiler->UploadSession();" << std::endl;
