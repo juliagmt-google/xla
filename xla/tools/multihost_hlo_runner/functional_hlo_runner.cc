@@ -1620,25 +1620,32 @@ absl::StatusOr<std::unique_ptr<GPURunnerProfiler>> GPURunnerProfiler::Create(
     return absl::InvalidArgumentError(
         "Please provide a valid dump path to save XSpace results to disk.");
   }
+  std::cout << "### GPURunnerProfiler dump_path:" << dump_path_ << std::endl;
   return std::make_unique<GPURunnerProfiler>(dump_path, keep_xspace);
 }
 
 void GPURunnerProfiler::CreateSession() {
+  std::cout << "### Entering GPURunnerProfiler::CreateSession()" << std::endl;
   auto options = tsl::ProfilerSession::DefaultOptions();
   options.set_device_type(tensorflow::ProfileOptions::GPU);
   session_ = tsl::ProfilerSession::Create(options);
+  std::cout << "### GPURunnerProfiler::CreateSession() created." << std::endl;
 }
 
 void GPURunnerProfiler::UploadSession() {
+  std::cout << "### Entering GPURunnerProfiler::UploadSession()" << std::endl;
   xspace_ = std::make_unique<tensorflow::profiler::XSpace>();
   // Stops the ProfilerSession
   TF_CHECK_OK(session_->CollectData(xspace_.get()));
+  std::cout << "### CollectData finished." << std::endl;
 
   CHECK(!dump_path_.empty());
 
   LOG(INFO) << "Saving xspace result to " << dump_path_;
+  std::cout << "### Saving xspace result to " << dump_path_ << std::endl;
   // Save in binary format to create xprof sessions and extract device stats.
   CHECK_OK(WriteBinaryProto(tsl::Env::Default(), dump_path_, *xspace_.get()));
+  LOG(INFO) << "### WriteBinaryProto finished. " << dump_path_;
   if (!keep_xspace_) {
     xspace_ = nullptr;
   }
