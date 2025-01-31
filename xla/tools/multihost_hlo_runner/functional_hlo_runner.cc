@@ -1160,7 +1160,9 @@ FunctionalHloRunner::RunInternal(
     if (repeat == running_options.num_repeats - 1) {
       execute_options.untuple_result = default_untuple_result;
       if (running_options.profiler != nullptr) {
+        std::cout << "### Before running_options.profiler->CreateSession();" << std::endl;
         running_options.profiler->CreateSession();
+        std::cout << "### After running_options.profiler->CreateSession();" << std::endl;
       }
     }
     execute_options.launch_id = repeat + 1;
@@ -1176,6 +1178,8 @@ FunctionalHloRunner::RunInternal(
     for (auto& future : *futures) {
       TF_RETURN_IF_ERROR(future.Await());
     }
+    std::cout << "FunctionalHloRunner: ExecuteOnDevices succeeded (repeat = "
+            << repeat << ")" << std::endl;
     VLOG(1) << "FunctionalHloRunner: ExecuteOnDevices succeeded (repeat = "
             << repeat << ")";
     if (repeat < running_options.num_repeats - 1) {
@@ -1198,12 +1202,16 @@ FunctionalHloRunner::RunInternal(
     }
   }
 
+  std::cout << "### Before FetchAndLogOutput" << std::endl;
   TF_ASSIGN_OR_RETURN(PerDeviceLiteralVecType results,
                       FetchAndLogOutput(client, output_buffers,
                                         running_options.module_output_mode,
                                         running_options.log_input_output()));
+  std::cout << "### After FetchAndLogOutput" << std::endl;
   if (running_options.profiler != nullptr) {
+    std::cout << "### Before running_options.profiler->UploadSession();" << std::endl;
     running_options.profiler->UploadSession();
+    std::cout << "### After running_options.profiler->UploadSession();" << std::endl;
   }
   return results;
 }
