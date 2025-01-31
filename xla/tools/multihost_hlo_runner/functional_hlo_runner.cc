@@ -1628,7 +1628,7 @@ absl::StatusOr<std::unique_ptr<GPURunnerProfiler>> GPURunnerProfiler::Create(
     return absl::InvalidArgumentError(
         "Please provide a valid dump path to save XSpace results to disk.");
   }
-  std::cout << "### GPURunnerProfiler dump_path:" << dump_path_ << std::endl;
+  std::cout << "### GPURunnerProfiler dump_path:" << dump_path << std::endl;
   return std::make_unique<GPURunnerProfiler>(dump_path, keep_xspace);
 }
 
