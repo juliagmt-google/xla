@@ -1141,10 +1141,22 @@ FunctionalHloRunner::RunInternal(
       VLOG(1) << "Creating argument buffers. repeat = " << repeat;
       device_buffers.clear();
       argument_ptrs.clear();
+      std::cout << "### (running_options.profiler != nullptr):" << (running_options.profiler != nullptr) << std::endl;
       TF_ASSIGN_OR_RETURN(device_buffers,
                           create_argument_buffers_on_device(flatten_arguments));
+      std::cout << "Creating argument pointers for device buffers" << std::endl;
+      std::cout << "### (running_options.profiler != nullptr):" << (running_options.profiler != nullptr) << std::endl;
+      for (const auto& device_buffer : device_buffers) {
+        std::cout << "### Device buffer size: " << device_buffer.size() << std::endl;
+        for (const auto& buffer : device_buffer) {
+           std::cout << "Buffer address: " << buffer.get() << std::endl;
+        }
+      }
+      std::cout << "### created buffer before CreateArgumentPointersFromDeviceBuffers " << std::endl;
       argument_ptrs = CreateArgumentPointersFromDeviceBuffers(device_buffers);
+      std::cout << "### after CreateArgumentPointersFromDeviceBuffers " << std::endl;
     }
+    std::cout << "### after (repeat == 0 || running_options.recreate_buffers_between_repeats)" << std::endl;
     if (repeat == running_options.num_repeats - 1) {
       execute_options.untuple_result = default_untuple_result;
       if (running_options.profiler != nullptr) {
