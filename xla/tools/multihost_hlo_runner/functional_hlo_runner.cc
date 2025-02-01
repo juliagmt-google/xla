@@ -1646,6 +1646,8 @@ void GPURunnerProfiler::UploadSession() {
   // Stops the ProfilerSession
   TF_CHECK_OK(session_->CollectData(xspace_.get()));
   std::cout << "### CollectData finished." << std::endl;
+  std::cout << "XSpace:" << xspace_->DebugString() << "\n" << std::endl;
+
 
   CHECK(!dump_path_.empty());
 
