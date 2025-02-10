@@ -88,6 +88,9 @@ jobs:
       #     bash run.sh | tee -a ../../../../../../results/flax_2b.log
 
       # TODO(juliagmt): Re-enable once the build is fixed.
+      - name: Configure CPU backend
+        working-directory: xla
+        run: ./configure.py --backend=CPU
       - name: Build run_hlo_module
         working-directory: xla
         run: bazelisk build -c opt --dynamic_mode=off xla/tools:run_hlo_module
