@@ -1589,6 +1589,7 @@ void GPURunnerProfiler::UploadSession() {
   xspace_ = std::make_unique<tensorflow::profiler::XSpace>();
   // Stops the ProfilerSession
   TF_CHECK_OK(session_->CollectData(xspace_.get()));
+  LOG(INFO) << "XSpace collected: "<< xspace_->DebugString();
 
   CHECK(!dump_path_.empty());
 
