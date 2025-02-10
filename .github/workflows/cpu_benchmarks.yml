@@ -84,13 +84,13 @@ jobs:
           uname -a # Kernel information
 
       - name: Run setup.sh for E2E benchmarks flax_2b
-        working-directory: xla/backends/cpu/benchmarks/e2e/gemma2/flax_2b
+        working-directory: backends/cpu/benchmarks/e2e/gemma2/flax_2b
         timeout-minutes: 60
         run: |
           bash setup.sh
 
       - name: Run run.sh for E2E benchmarks flax_2b
-        working-directory: xla/backends/cpu/benchmarks/e2e/gemma2/flax_2b
+        working-directory: backends/cpu/benchmarks/e2e/gemma2/flax_2b
         timeout-minutes: 30
         run: |
           bash run.sh | tee -a ../../../../../../results/flax_2b.log
