@@ -187,6 +187,8 @@ cc_library(
         "@tsl//tsl/profiler/lib:profiler_session",
         "@tsl//tsl/profiler/lib:profiler_session_impl",
         "@tsl//tsl/profiler/protobuf:xplane_proto_cc",
+        "//xla/backends/profiler/gpu:cupti_tracer",
+        "//xla/backends/profiler/gpu:device_tracer",
     ],
 )
 
