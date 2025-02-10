@@ -89,8 +89,9 @@ jobs:
 
       # TODO(juliagmt): Re-enable once the build is fixed.
       - name: Configure CPU backend
-        working-directory: openxla
+        working-directory: xla
         run: |
+          cd ..
           ls 
           ./configure.py --backend=CPU
         
