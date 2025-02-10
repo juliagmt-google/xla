@@ -90,7 +90,7 @@ jobs:
       # TODO(juliagmt): Re-enable once the build is fixed.
       - name: Build run_hlo_module
         working-directory: xla
-        run: bazel build -c opt --dynamic_mode=off //xla/tools:run_hlo_module
+        run: bazelisk build -c opt --dynamic_mode=off xla/tools:run_hlo_module
 
       - name: Run HLO Module Benchmarks
         working-directory: xla
@@ -109,7 +109,7 @@ jobs:
 
       - name: Build CPU Benchmarks
         working-directory: xla
-        run: bazel build -c opt --dynamic_mode=off //xla/backends/cpu/benchmarks:*
+        run: bazelisk build -c opt --dynamic_mode=off //xla/service/cpu/benchmarks:*
 
       - name: Run CPU benchmarks
         working-directory: xla
