@@ -87,7 +87,7 @@ jobs:
         working-directory: openxla
         timeout-minutes: 60
         run: |
-          cd xla/xla/backends/cpu/benchmarks/e2e/gemma2/flax_2b
+          cd xla/backends/cpu/benchmarks/e2e/gemma2/flax_2b
           bash setup.sh
           bash run.sh | tee -a ../../../../../../results/flax_2b.log
 
