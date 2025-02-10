@@ -52,24 +52,29 @@ jobs:
           df -h    # Disk space information
           uname -a # Kernel information
 
-      # - name: Check Python Version in Container
-      #   run: python3 --version
+      - name: Check Python Version in Container
+        run: python3 --version
 
-      # - name: Install Python 3.10 if not present (IN CONTAINER)
-      #   run: |
-      #     if ! python3 --version > /dev/null 2>&1; then # check for python3
-      #       echo "Python 3 not found, installing..."
-      #       apt-get update
-      #       apt-get install -y python3.10 python3-pip
-      #     else
-      #       echo "Python 3 found."
-      #     fi
+      - name: Install Python 3.10 if not present (IN CONTAINER)
+        run: |
+          if ! python3 --version > /dev/null 2>&1; then # check for python3
+            echo "Python 3 not found, installing..."
+            apt-get update
+            apt-get install -y python3.10 python3-pip
+          else
+            echo "Python 3 found."
+          fi
 
       - name: Checkout OpenXLA
         uses: actions/checkout@v3
         with:
-          repository: 'openxla/xla'
+          repository: openxla/xla
           path: openxla
+          
+      - name: Create results directory
+        working-directory: openxla
+        run:
+          mkdir results
 
       - name: Print machine specs
         run: |
@@ -78,19 +83,18 @@ jobs:
           df -h    # Disk space information
           uname -a # Kernel information
 
-      # - name: Run setup.sh for E2E benchmarks flax_2b
-      #   working-directory: xla/backends/cpu/benchmarks/e2e/gemma2/flax_2b
-      #   timeout-minutes: 60
-      #   run: |
-      #     bash setup.sh
+      - name: Run setup.sh for E2E benchmarks flax_2b
+        working-directory: xla/backends/cpu/benchmarks/e2e/gemma2/flax_2b
+        timeout-minutes: 60
+        run: |
+          bash setup.sh
 
-      # - name: Run run.sh for E2E benchmarks flax_2b
-      #   working-directory: xla/backends/cpu/benchmarks/e2e/gemma2/flax_2b
-      #   timeout-minutes: 30
-      #   run: |
-      #     bash run.sh | tee -a ../../../../../../results/flax_2b.log
+      - name: Run run.sh for E2E benchmarks flax_2b
+        working-directory: xla/backends/cpu/benchmarks/e2e/gemma2/flax_2b
+        timeout-minutes: 30
+        run: |
+          bash run.sh | tee -a ../../../../../../results/flax_2b.log
 
-      # TODO(juliagmt): Re-enable once the build is fixed.
       - name: Configure CPU backend
         working-directory: openxla
         run: |
