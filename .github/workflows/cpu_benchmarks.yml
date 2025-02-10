@@ -94,8 +94,6 @@ jobs:
       - name: Configure CPU backend
         working-directory: openxla
         run: |
-          # cd ..
-          ls 
           ./configure.py --backend=CPU
         
       - name: Build run_hlo_module
@@ -106,7 +104,7 @@ jobs:
         working-directory: openxla
         continue-on-error: true
         run: |
-          for file in tests/fuzz/*.hlo; do
+          for file in xla/tests/fuzz/*.hlo; do
             filename=$(basename "$file")
             # Skip expected failed hlo files.
             if [[ "$filename" == "rand_000060.hlo" || "$filename" == "rand_000067.hlo" || "$filename" == "rand_000072.hlo" ]]; then
@@ -119,7 +117,7 @@ jobs:
 
       - name: Build CPU Benchmarks
         working-directory: openxla
-        run: bazel build -c opt --dynamic_mode=off //xla/service/cpu/benchmarks:*
+        run: bazel build -c opt --dynamic_mode=off //xla/backends/cpu/benchmarks:*
 
       - name: Run CPU benchmarks
         working-directory: openxla
