@@ -68,10 +68,10 @@ jobs:
       - name: Checkout OpenXLA
         uses: actions/checkout@v3
         with:
-          repository: openxla/xla
+          repository: openxla
 
       - name: Create results directory
-        working-directory: xla
+        working-directory: openxla
         run:
           mkdir results
 
@@ -89,18 +89,18 @@ jobs:
 
       # TODO(juliagmt): Re-enable once the build is fixed.
       - name: Configure CPU backend
-        working-directory: xla
+        working-directory: openxla
         run: |
-          cd ..
+          # cd ..
           ls 
           ./configure.py --backend=CPU
         
       - name: Build run_hlo_module
-        working-directory: xla
+        working-directory: openxla/xla
         run: bazel build -c opt --dynamic_mode=off xla/tools:run_hlo_module
 
       - name: Run HLO Module Benchmarks
-        working-directory: xla
+        working-directory: openxla/xla
         continue-on-error: true
         run: |
           for file in tests/fuzz/*.hlo; do
