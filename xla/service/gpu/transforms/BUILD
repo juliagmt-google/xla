@@ -475,7 +475,7 @@ xla_cc_test(
 xla_test(
     name = "block_scaling_rewriter_cudnn_test",
     srcs = ["block_scaling_rewriter_cudnn_test.cc"],
-    backends = ["gpu_b100"],
+    backends = ["gpu_b200"],
     deps = [
         ":block_scaling_rewriter",
         "//xla/tests:hlo_test_base",
@@ -500,6 +500,7 @@ cc_library(
         "//xla/hlo/pass:hlo_pass",
         "//xla/hlo/utils:hlo_query",
         "//xla/service:collective_ops_utils",
+        "//xla/service:collective_permute_cycle",
         "//xla/service:source_target_pairs",
         "//xla/service/gpu:backend_configs_cc",
         "//xla/tsl/platform:errors",
@@ -614,6 +615,7 @@ cc_library(
         "//xla/hlo/ir:hlo",
         "//xla/hlo/pass:hlo_pass",
         "//xla/service:collective_ops_utils",
+        "//xla/service:collective_permute_cycle",
         "//xla/service:pattern_matcher",
         "//xla/service:source_target_pairs",
         "//xla/tsl/platform:statusor",
@@ -621,7 +623,6 @@ cc_library(
         "@com_google_absl//absl/log",
         "@com_google_absl//absl/log:check",
         "@com_google_absl//absl/status:statusor",
-        "@com_google_absl//absl/strings",
         "@com_google_absl//absl/strings:string_view",
     ],
 )
@@ -1409,7 +1410,7 @@ xla_test(
         "gpu_a100",
         "gpu_p100",
         "gpu_v100",
-        "gpu_b100",
+        "gpu_b200",
         "gpu_amd_any",
     ],
     deps = if_gpu_is_configured(
@@ -3225,7 +3226,7 @@ xla_test(
     backends = [
         "gpu_a100",
         "gpu_h100",
-        "gpu_b100",
+        "gpu_b200",
     ],
     deps = [
         ":triton_fusion_numerics_verifier",
