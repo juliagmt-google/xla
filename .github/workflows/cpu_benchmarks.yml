@@ -68,12 +68,15 @@ jobs:
       - name: Checkout OpenXLA
         uses: actions/checkout@v3
         with:
-          repository: openxla
+          repository: 'openxla/xla'
+          path: openxla
 
-      - name: Create results directory
-        working-directory: openxla
-        run:
-          mkdir results
+      - name: Print machine specs
+        run: |
+          lscpu
+          free -h  # Memory information
+          df -h    # Disk space information
+          uname -a # Kernel information
 
       # - name: Run setup.sh for E2E benchmarks flax_2b
       #   working-directory: xla/backends/cpu/benchmarks/e2e/gemma2/flax_2b
@@ -96,11 +99,11 @@ jobs:
           ./configure.py --backend=CPU
         
       - name: Build run_hlo_module
-        working-directory: openxla/xla
+        working-directory: openxla
         run: bazel build -c opt --dynamic_mode=off xla/tools:run_hlo_module
 
       - name: Run HLO Module Benchmarks
-        working-directory: openxla/xla
+        working-directory: openxla
         continue-on-error: true
         run: |
           for file in tests/fuzz/*.hlo; do
@@ -115,11 +118,11 @@ jobs:
           done
 
       - name: Build CPU Benchmarks
-        working-directory: xla
+        working-directory: openxla
         run: bazel build -c opt --dynamic_mode=off //xla/service/cpu/benchmarks:*
 
       - name: Run CPU benchmarks
-        working-directory: xla
+        working-directory: openxla
         continue-on-error: true
         run: |
           find ./bazel-bin/xla/backends/cpu/benchmarks/ -maxdepth 1 -type f -executable -name "*_test" -print0 | while IFS= read -r -d $'\0' benchmark; do
