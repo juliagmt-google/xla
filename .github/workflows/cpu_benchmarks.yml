@@ -48,7 +48,7 @@ jobs:
     defaults:
       run:
         shell: bash
-    timeout-minutes: 30
+    timeout-minutes: 90
     steps:
       - name: Print machine specs
         run: |
