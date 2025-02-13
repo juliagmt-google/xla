@@ -247,11 +247,11 @@ static absl::Status RunMultihostHloRunner(int argc, char** argv,
                  absl::Seconds(opts.gpu_client_initialization_timeout_sec)));
     // Create a GPURunnerProfiler to profile GPU executions to save xspace data
     // to disk.
-    if (env.client != nullptr && !opts.xla_gpu_dump_xspace_to.empty()) {
+    if (env.client != nullptr) {
       TF_ASSIGN_OR_RETURN(auto profiler,
                           GPURunnerProfiler::Create(opts.xla_gpu_dump_xspace_to,
                                                     /*keep_xspace=*/false));
-      running_options.profiler = profiler.release();
+      running_options.profiler = profiler.get();
     }
   } else if (opts.device_type_str == "host") {
     TF_ASSIGN_OR_RETURN(env, xla::GetPjRtEnvironmentForHostCpu());
