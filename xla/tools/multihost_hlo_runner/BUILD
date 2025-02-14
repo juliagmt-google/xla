@@ -60,8 +60,12 @@ cc_library(
         "@tsl//tsl/platform:statusor",
     ] + if_cuda_or_rocm([
         "//xla/service:gpu_plugin",
+        "//xla/backends/profiler/gpu:cupti_tracer",
+        "//xla/backends/profiler/gpu:device_tracer",
     ]) + if_cuda([
         "//xla/stream_executor:cuda_platform",
+        "//xla/backends/profiler/gpu:cupti_tracer",
+        "//xla/backends/profiler/gpu:device_tracer",
     ] + if_google(
         [
             "//third_party/py/jax/jaxlib:gpu_kernels",  # fixdeps: keep
@@ -187,8 +191,8 @@ cc_library(
         "@tsl//tsl/profiler/lib:profiler_session",
         "@tsl//tsl/profiler/lib:profiler_session_impl",
         "@tsl//tsl/profiler/protobuf:xplane_proto_cc",
-        "//xla/backends/profiler/gpu:cupti_tracer",
-        "//xla/backends/profiler/gpu:device_tracer",
+        # "//xla/backends/profiler/gpu:cupti_tracer",
+        # "//xla/backends/profiler/gpu:device_tracer",
     ],
 )
 
