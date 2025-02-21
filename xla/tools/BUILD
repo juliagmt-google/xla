@@ -1053,5 +1053,6 @@ xla_cc_binary(
         "@tsl//tsl/platform:platform_port",
         "@tsl//tsl/platform:status",
         "//xla:debug_options_flags",
+        "@com_google_absl//absl/container:flat_hash_map",
     ],
 )
