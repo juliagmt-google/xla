@@ -81,7 +81,7 @@ int main(int argc, char* argv[]) {
   std::cout << "Input file: " << input << std::endl;
   tsl::Env* env = tsl::Env::Default();
   XSpace xspace_proto;
-  tsl::Status status = tsl::ReadTextProto(env, input, &xspace_proto);
+  tsl::Status status = tsl::ReadBinaryProto(env, input, &xspace_proto);
   std::cout << "Reading and parsing protobuf: " << status.ToString() << "\n";
 
   if (!status.ok()) {
