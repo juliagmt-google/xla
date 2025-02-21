@@ -1038,3 +1038,20 @@ lit_test_suite(
         "@llvm-project//llvm:FileCheck",
     ],
 )
+xla_cc_binary(
+    name = "get_device_stats_main",
+    srcs = ["get_device_stats.cc"],
+    deps = [
+        "//xla:shape_util",
+        "@com_google_absl//absl/status:statusor",
+        "@tsl//tsl/platform:env",
+        "@tsl//tsl/platform:logging",
+        "@tsl//tsl/profiler/protobuf:xplane_proto_cc",
+        "//xla/tsl/util:command_line_flags",
+        "@com_google_absl//absl/log",
+        "@com_google_absl//absl/strings",
+        "@tsl//tsl/platform:platform_port",
+        "@tsl//tsl/platform:status",
+        "//xla:debug_options_flags",
+    ],
+)
