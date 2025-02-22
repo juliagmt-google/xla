@@ -45,19 +45,19 @@ jobs:
       - name: Checkout XLA
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
-      - name: Print machine specs
-        run: |
-          nvidia-smi
-          free -h  # Memory information
-          df -h    # Disk space information
-          uname -a # Kernel information
+      # - name: Print machine specs
+      #   run: |
+      #     nvidia-smi
+      #     free -h  # Memory information
+      #     df -h    # Disk space information
+      #     uname -a # Kernel information
 
       - name: Create results directory
         run: mkdir results
 
-      - name: Configure XLA for GPU backend
+      - name: Configure XLA for CPU backend for test
         run: |
-          ./configure.py --backend CUDA --nccl
+          ./configure.py --backend CPU --nccl
 
       - name: Set TF_CPP_MAX_VLOG_LEVEL
         env:
@@ -66,7 +66,7 @@ jobs:
           echo "TF_CPP_MAX_VLOG_LEVEL is: $TF_CPP_MAX_VLOG_LEVEL"
 
       - name: Build hlo_runner_main
-        run: bazel build -c opt --config=cuda --dynamic_mode=off //xla/tools/multihost_hlo_runner:hlo_runner_main
+        run: bazel build -c opt --dynamic_mode=off //xla/tools/multihost_hlo_runner:hlo_runner_main
       # TODO(juliagmt): Add more performance-criticalHLOs to benchmark.
       - name: Run xla/tools/hlo_opt/tests/gpu_hlo_pass.hlo
         run: |
@@ -75,7 +75,7 @@ jobs:
       - name: Compute the cost of gpu_hlo_pass.hlo
         run: |
           PWD=$(pwd)
-          bazel run //xla/tools:compute_cost -- --input=$PWD/xla/tools/hlo_opt/tests/gpu_hlo_pass.hlo --format=hlo --gpu
+          bazel run //xla/tools:compute_cost -- --input=$PWD/xla/tools/hlo_opt/tests/gpu_hlo_pass.hlo --format=hlo
 
       - name: Set XSPACE_PATH Variable
         env:
