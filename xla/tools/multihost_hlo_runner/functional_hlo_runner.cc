@@ -566,7 +566,7 @@ absl::Status FunctionalHloRunner::LoadAndRunAndDump(
                                                 task_id, num_nodes, kv_store));
   auto create_compile_options_end_time = std::chrono::high_resolution_clock::now();
   std::chrono::duration<double> create_compile_options_duration =
-      create_compile_options_end_time - create_compile_options_start_time;
+  create_compile_options_end_time - create_compile_options_start_time;
   std::cout << "CreateCompileOptions: " << create_compile_options_duration.count()
             << " s" << std::endl;
   
@@ -907,18 +907,36 @@ FunctionalHloRunner::Run(PjRtClient& client, PjRtLoadedExecutable* executable,
         int device_id = device_id_and_arguments.first;
         flattened_arguments.insert({device_id, std::move(flattened_argument)});
       }
-      return CopyArgumentsToDevice(client, executable, flattened_arguments,
+      auto copy_arguments_to_device_start_time =
+          std::chrono::high_resolution_clock::now();
+      auto s = CopyArgumentsToDevice(client, executable, flattened_arguments,
                                    running_options,
                                    /*flattened_arguments=*/true);
+      auto copy_arguments_to_device_end_time = std::chrono::high_resolution_clock::now();
+      auto copy_arguments_to_device_duration = copy_arguments_to_device_end_time - copy_arguments_to_device_start_time;
+      std::cout << "CopyArgumentsToDevice: " << copy_arguments_to_device_duration.count() << " s" << std::endl;
+      return s;
     }
     // If the per-device argument is not a single tuple, we ignore the
     // flatten_tupled_arguments parameter and assume the provided arguments have
     // already been flattened.
-    return CopyArgumentsToDevice(client, executable, arguments, running_options,
+    auto copy_arguments_to_device_start_time =
+        std::chrono::high_resolution_clock::now();
+    auto s = CopyArgumentsToDevice(client, executable, arguments, running_options,
                                  /*flattened_arguments=*/false);
+    auto copy_arguments_to_device_end_time = std::chrono::high_resolution_clock::now();
+    auto copy_arguments_to_device_duration = copy_arguments_to_device_end_time - copy_arguments_to_device_start_time;
+    std::cout << "CopyArgumentsToDevice: " << copy_arguments_to_device_duration.count() << " s" << std::endl;
+    return s;
   };
-  return RunInternal(client, executable, create_argument_buffers_on_device,
-                     running_options);
+  auto run_internal_start_time = std::chrono::high_resolution_clock::now();
+  auto s = RunInternal(client, executable, create_argument_buffers_on_device,
+                       running_options);
+  auto run_internal_end_time = std::chrono::high_resolution_clock::now();
+  auto run_internal_duration = run_internal_end_time - run_internal_start_time;
+  std::cout << "RunInternal: " << run_internal_duration.count() << " s"
+            << std::endl;
+  return s;
 }
 
 namespace {
@@ -1254,13 +1272,29 @@ FunctionalHloRunner::CreateArgumentsOnDevice(
   }
 
   if (kUseSharedInputs) {
-    return CopyArgumentsToDevice(client, executable,
-                                 per_device_argument_literals, running_options,
-                                 flatten_arguments,
-                                 /*clone_device0_arguments=*/true);
+    auto copy_arguments_to_device_start_time =
+        std::chrono::high_resolution_clock::now();
+    auto s = CopyArgumentsToDevice(client, executable,
+      per_device_argument_literals, running_options,
+      flatten_arguments,
+      /*clone_device0_arguments=*/true);
+    auto copy_arguments_to_device_end_time =
+        std::chrono::high_resolution_clock::now();
+    auto copy_arguments_to_device_duration = copy_arguments_to_device_end_time -
+                                              copy_arguments_to_device_start_time;
+    std::cout << "CopyArgumentsToDevice: " << copy_arguments_to_device_duration.count() << " s" << std::endl;
+    return s;
   }
-  return CopyArgumentsToDevice(client, executable, per_device_argument_literals,
-                               running_options, flatten_arguments);
+  auto copy_arguments_to_device_start_time =
+      std::chrono::high_resolution_clock::now();
+  auto s = CopyArgumentsToDevice(client, executable, per_device_argument_literals,
+                                 running_options, flatten_arguments);
+  auto copy_arguments_to_device_end_time =
+      std::chrono::high_resolution_clock::now();
+  auto copy_arguments_to_device_duration = copy_arguments_to_device_end_time -
+                                            copy_arguments_to_device_start_time;
+  std::cout << "CopyArgumentsToDevice: " << copy_arguments_to_device_duration.count() << " s" << std::endl;
+  return s;
 }
 
 absl::StatusOr<std::vector<std::vector<std::unique_ptr<PjRtBuffer>>>>
