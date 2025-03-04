@@ -272,15 +272,27 @@ static absl::Status RunMultihostHloRunner(int argc, char** argv,
     execution_profiles.clear();
     if (opts.should_run) {
       std::cout << "\n** Running " << filename << " **\n";
+      auto load_and_run_and_dump_start_time = std::chrono::high_resolution_clock::now();
       TF_RETURN_IF_ERROR(xla::FunctionalHloRunner::LoadAndRunAndDump(
           *env.client, GetDebugOptionsFromFlags(), preproc_options,
           raw_compile_options, running_options, filename, opts.input_format,
           opts.dump_output_literal_to, opts.task_id));
+      auto load_and_run_and_dump_end_time = std::chrono::high_resolution_clock::now();
+      std::chrono::duration<double> load_and_run_and_dump_duration =
+      load_and_run_and_dump_end_time - load_and_run_and_dump_start_time;
+      std::cout << "LoadAndRunAndDump: " << load_and_run_and_dump_duration.count()
+                << " s" << std::endl;
     } else {
       std::cout << "\n** Compiling " << filename << " **\n";
+      auto load_and_compile_start_time = std::chrono::high_resolution_clock::now();
       TF_RETURN_IF_ERROR(FunctionalHloRunner::LoadAndCompile(
           *env.client, GetDebugOptionsFromFlags(), preproc_options,
           raw_compile_options, argv[c], opts.input_format, opts.task_id));
+      auto load_and_compile_end_time = std::chrono::high_resolution_clock::now();
+      std::chrono::duration<double> load_and_compile_duration =
+      load_and_compile_end_time - load_and_compile_start_time;
+      std::cout << "LoadAndCompile: " << load_and_compile_duration.count()
+                << " s" << std::endl;
     }
     for (int i = 0; i < execution_profiles.size(); ++i) {
       std::cout << "## Execution time, file=" << filename << " repeat=" << i
@@ -382,11 +394,17 @@ int main(int argc, char** argv) {
   if (!parse_ok) {
     LOG(QFATAL) << kUsageString;
   }
+  auto run_multihost_hlo_runner_start_time = std::chrono::high_resolution_clock::now();
   absl::Status s = xla::RunMultihostHloRunner(argc, argv, opts);
   if (!s.ok()) {
     std::cerr << s;
     return 1;
   }
+  auto run_multihost_hlo_runner_end_time = std::chrono::high_resolution_clock::now();
+  std::chrono::duration<double> run_multihost_hlo_runner_duration =
+    run_multihost_hlo_runner_end_time - run_multihost_hlo_runner_start_time;
+  std::cout << "RunMultihostHloRunner: " << compile_and_run_duration.count()
+            << " s" << std::endl;
 
   return 0;
 }
