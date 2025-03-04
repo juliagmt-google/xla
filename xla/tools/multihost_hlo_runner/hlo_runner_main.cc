@@ -403,7 +403,7 @@ int main(int argc, char** argv) {
   auto run_multihost_hlo_runner_end_time = std::chrono::high_resolution_clock::now();
   std::chrono::duration<double> run_multihost_hlo_runner_duration =
     run_multihost_hlo_runner_end_time - run_multihost_hlo_runner_start_time;
-  std::cout << "RunMultihostHloRunner: " << compile_and_run_duration.count()
+  std::cout << "RunMultihostHloRunner: " << run_multihost_hlo_runner_duration.count()
             << " s" << std::endl;
 
   return 0;
