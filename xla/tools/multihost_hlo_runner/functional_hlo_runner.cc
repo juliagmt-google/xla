@@ -566,8 +566,8 @@ absl::Status FunctionalHloRunner::LoadAndRunAndDump(
                                                 task_id, num_nodes, kv_store));
   auto create_compile_options_end_time = std::chrono::high_resolution_clock::now();
   std::chrono::duration<double> create_compile_options_duration =
-      create-_ompile_options_end_time - create-create_compile_options_start_time;
-  std::cout << "CreateCompileOptions: " << create-compile_options_duration.count()
+      create_compile_options_end_time - create_compile_options_start_time;
+  std::cout << "CreateCompileOptions: " << create_compile_options_duration.count()
             << " s" << std::endl;
   
   auto load_and_run_start_time = std::chrono::high_resolution_clock::now();
