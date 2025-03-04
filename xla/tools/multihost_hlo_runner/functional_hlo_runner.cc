@@ -136,9 +136,9 @@ const FixedOptionSetFlagParser<InputFormat>& GetInputFormatParser() {
        {"proto_text", InputFormat::kProtoText},
        {"proto_binary", InputFormat::kProtoBinary},
        {"snapshot_proto_binary", InputFormat::kSnapshotProtoBinary},
-       {"unoptimized_snapshot_proto_binary",
+       {"input_snapshot_proto_binary",
         InputFormat::kUnoptimizedSnapshotProtoBinary},
-       {"unoptimized_snapshot_proto_text",
+       {"input_snapshot_proto_text",
         InputFormat::kUnoptimizedSnapshotProtoText}});
   return parser;
 }
@@ -559,15 +559,28 @@ absl::Status FunctionalHloRunner::LoadAndRunAndDump(
     absl::string_view hlo_text, InputFormat input_format,
     std::string dump_output_to, int task_id, int num_nodes,
     std::shared_ptr<xla::KeyValueStoreInterface> kv_store) {
+  auto create_compile_options_start_time = std::chrono::high_resolution_clock::now();
   TF_ASSIGN_OR_RETURN(
       CompileOptions compile_options,
       FunctionalHloRunner::CreateCompileOptions(client, raw_compile_options,
                                                 task_id, num_nodes, kv_store));
+  auto create_compile_options_end_time = std::chrono::high_resolution_clock::now();
+  std::chrono::duration<double> create_compile_options_duration =
+      create-_ompile_options_end_time - create-create_compile_options_start_time;
+  std::cout << "CreateCompileOptions: " << create-compile_options_duration.count()
+            << " s" << std::endl;
+  
+  auto load_and_run_start_time = std::chrono::high_resolution_clock::now();
   TF_ASSIGN_OR_RETURN(
       FunctionalHloRunner::PerDeviceLiteralVecType output,
       FunctionalHloRunner::LoadAndRun(client, debug_options, preproc_options,
                                       compile_options, running_options,
                                       hlo_text, input_format));
+  auto load_and_run_end_time = std::chrono::high_resolution_clock::now();
+  std::chrono::duration<double> load_and_run_duration =
+      load_and_run_end_time - load_and_run_start_time;
+  std::cout << "LoadAndRun: " << load_and_run_duration.count() << " s"
+            << std::endl;
   return dump_output_to.empty()
              ? absl::OkStatus()
              : FunctionalHloRunner::DumpOutput(output, dump_output_to, task_id);
@@ -662,11 +675,21 @@ FunctionalHloRunner::CompileAndRun(PjRtClient& client,
                                    HloModule* hlo_module,
                                    const PerDeviceLiteralVecType& arguments,
                                    std::minstd_rand0* engine) {
+  auto compile_start_time = std::chrono::high_resolution_clock::now();
   TF_ASSIGN_OR_RETURN(std::unique_ptr<PjRtLoadedExecutable> executable,
                       Compile(client, hlo_module, debug_options,
                               preproc_options, compile_options));
-
-  return Run(client, executable.get(), arguments, running_options, engine);
+  auto compile_end_time = std::chrono::high_resolution_clock::now();
+  std::chrono::duration<double> compile_duration =
+      compile_end_time - compile_start_time;
+  std::cout << "Compile: " << compile_duration.count() << " s" << std::endl;
+  
+  auto run_start_time = std::chrono::high_resolution_clock::now();
+  auto s =  Run(client, executable.get(), arguments, running_options, engine);
+  auto run_end_time = std::chrono::high_resolution_clock::now();
+  std::chrono::duration<double> run_duration = run_end_time - run_start_time;
+  std::cout << "Run: " << run_duration.count() << " s" << std::endl;
+  return s;
 }
 
 namespace {
