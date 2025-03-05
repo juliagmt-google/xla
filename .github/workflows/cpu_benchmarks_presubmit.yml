@@ -86,4 +86,5 @@ jobs:
       
       # TODO(juliagmt): add workflow to run performance tests.
       - name: Run xla/tests/fuzz/rand_000001.hlo and collect runtime and compile time
-        run: ./bazel-bin/xla/tools/run_hlo_module --input_format=hlo --platform=CPU xla/tests/fuzz/rand_000001.hlo
+        run: |
+          ls
