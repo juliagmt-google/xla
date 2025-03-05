@@ -93,10 +93,24 @@ jobs:
           echo "Running bazel query:"
           bazel query '//xla/tools:run_hlo_module' --output build
         working-directory: xla #Run Bazel query inside the checked out directory
-      - name: List bazel-out contents
+      - name: Find Binary
         run: |
-          find bazel-out/ -name "run_hlo_module" -executable
-
+          #!/bin/bash
+      
+          workspace_path="${{ github.workspace }}/xla"
+          binary_name="run_hlo_module"
+      
+          binary_path=$(find "$workspace_path" -name "$binary_name*" -executable)
+      
+          if [[ -n "$binary_path" ]]; then
+            echo "Found binary at: $binary_path"
+            echo "::set-output name=binary_path::$binary_path" # Set output for other steps
+          else
+            echo "Binary not found in workspace."
+            exit 1
+          fi
+        working-directory: xla
+        id: find-binary
       - name: List Artifacts (Attempt 1)
         run: |
           echo "Listing files in bazel-out/aarch64-opt/bin/xla/tools (Attempt 1):"
