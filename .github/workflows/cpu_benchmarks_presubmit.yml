@@ -75,14 +75,14 @@ jobs:
 
       - name: Checkout OpenXLA
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-      
+
+      - name: "Run build.py"
+        run: ./build_tools/ci/build.py --build="${{ matrix.job_info.pretty_name }}_github_actions"
+          
       - name: "Wait For Connection"
         uses: google-ml-infra/actions/ci_connection@main
         with:
           halt-dispatch-input: ${{ inputs.halt-for-connection }}
-
-      - name: "Run build.py"
-        run: ./build_tools/ci/build.py --build="${{ matrix.job_info.pretty_name }}_github_actions"
       
       # TODO(juliagmt): add workflow to run performance tests.
       - name: Run xla/tests/fuzz/rand_000001.hlo and collect runtime and compile time
