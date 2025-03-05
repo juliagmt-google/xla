@@ -130,7 +130,7 @@ jobs:
           
 
       - name: Run gemma2_2b_keras_jax.hlo and collect runtime and compile time
-        run: ./bazel-bin/xla/tools/run_hlo_module --input_format=hlo --platform=CPU --reference_platform="" tmp_hlo/gemma2_2b_keras_jax.hlo
+        run: ./bazel-bin/xla/tools/run_hlo_module --input_format=hlo --platform=CPU --reference_platform="" --print_literals=True tmp_hlo/gemma2_2b_keras_jax.hlo
       - name: Compute the cost of gemma2_2b_keras_jax.hlo
         run: |
           PWD=$(pwd)
