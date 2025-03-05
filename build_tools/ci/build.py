@@ -48,6 +48,9 @@ _XLA_DEFAULT_TARGET_PATTERNS = (
     "//build_tools/...",
     "@tsl//tsl/...",
 )
+_XLA_CPU_PRESUBMIT_BENCHMARKS_DEFAULT_TARGET_PATTERNS = (
+    "//xla/tools:run_hlo_module",
+)
 _KOKORO_ARTIFACTS_DIR = os.environ.get(
     "KOKORO_ARTIFACTS_DIR", "$KOKORO_ARTIFACTS_DIR"
 )
@@ -92,6 +95,11 @@ class BuildType(enum.Enum):
   XLA_LINUX_X86_CPU_GITHUB_ACTIONS = enum.auto()
   XLA_LINUX_ARM64_CPU_GITHUB_ACTIONS = enum.auto()
   XLA_LINUX_X86_GPU_T4_GITHUB_ACTIONS = enum.auto()
+
+  # Presubmit builds for regression testing.
+  XLA_LINUX_X86_CPU_16_VCPU_PRESUBMIT_GITHUB_ACTIONS = enum.auto()
+  XLA_LINUX_ARM64_CPU_16_VCPU_PRESUBMIT_GITHUB_ACTIONS = enum.auto()
+  XLA_LINUX_X86_CPU_128_VCPU_PRESUBMIT_GITHUB_ACTIONS = enum.auto()
 
   XLA_MACOS_X86_CPU_KOKORO = enum.auto()
   XLA_MACOS_ARM64_CPU_KOKORO = enum.auto()
@@ -138,7 +146,7 @@ class Build:
     return cls._builds
 
   def bazel_command(
-      self, subcommand: str = "build", extra_options: Tuple[str, ...] = ()
+      self, subcommand: str = "test", extra_options: Tuple[str, ...] = ()
   ) -> List[str]:
     """Returns a bazel test command for this build.
 
@@ -220,7 +228,7 @@ def nvidia_gpu_build_with_compute_capability(
   return Build(
       type_=type_,
       repo="openxla/xla",
-      target_patterns= ("//xla/tools:run_hlo_module",), # _XLA_DEFAULT_TARGET_PATTERNS,
+      target_patterns=_XLA_DEFAULT_TARGET_PATTERNS,
       configs=configs,
       test_tag_filters=("-no_oss", "requires-gpu-nvidia", "gpu", "-rocm-only")
       + extra_gpu_tags,
@@ -245,7 +253,7 @@ _XLA_LINUX_X86_CPU_GITHUB_ACTIONS_BUILD = Build(
     type_=BuildType.XLA_LINUX_X86_CPU_GITHUB_ACTIONS,
     repo="openxla/xla",
     configs=("warnings", "nonccl", "rbe_linux_cpu"),
-    target_patterns=("//xla/tools:run_hlo_module",),
+    target_patterns=_XLA_DEFAULT_TARGET_PATTERNS,
     build_tag_filters=cpu_x86_tag_filter,
     test_tag_filters=cpu_x86_tag_filter,
     options=_DEFAULT_BAZEL_OPTIONS,
@@ -262,8 +270,8 @@ _XLA_LINUX_ARM64_CPU_GITHUB_ACTIONS_BUILD = Build(
     type_=BuildType.XLA_LINUX_ARM64_CPU_GITHUB_ACTIONS,
     repo="openxla/xla",
     configs=("warnings", "rbe_cross_compile_linux_arm64", "nonccl"),
-    target_patterns=("//xla/tools:run_hlo_module",),
-    options={**_DEFAULT_BAZEL_OPTIONS, "build_tests_only": False},
+    target_patterns=_XLA_DEFAULT_TARGET_PATTERNS,
+    options={**_DEFAULT_BAZEL_OPTIONS, "build_tests_only": True},
     build_tag_filters=cpu_arm_tag_filter,
     test_tag_filters=cpu_arm_tag_filter,
 )
@@ -274,6 +282,36 @@ _XLA_LINUX_X86_GPU_T4_GITHUB_ACTIONS_BUILD = (
         configs=("warnings", "rbe_linux_cuda_nvcc"),
         compute_capability=75,
     )
+)
+
+_XLA_LINUX_X86_CPU_16_VCPU_PRESUBMIT_GITHUB_ACTIONS_BUILD = Build(
+    type_=BuildType.XLA_LINUX_X86_CPU_16_VCPU_PRESUBMIT_GITHUB_ACTIONS,
+    repo="openxla/xla",
+    configs=("warnings", "nonccl", "rbe_linux_cpu"),
+    target_patterns=_XLA_CPU_PRESUBMIT_BENCHMARKS_DEFAULT_TARGET_PATTERNS,
+    build_tag_filters=cpu_x86_tag_filter,
+    test_tag_filters=cpu_x86_tag_filter,
+    options=_DEFAULT_BAZEL_OPTIONS,
+)
+
+_XLA_LINUX_X86_CPU_128_VCPU_PRESUBMIT_GITHUB_ACTIONS_BUILD = Build(
+    type_=BuildType.XLA_LINUX_X86_CPU_128_VCPU_PRESUBMIT_GITHUB_ACTIONS,
+    repo="openxla/xla",
+    configs=("warnings", "nonccl", "rbe_linux_cpu"),
+    target_patterns=_XLA_CPU_PRESUBMIT_BENCHMARKS_DEFAULT_TARGET_PATTERNS,
+    build_tag_filters=cpu_x86_tag_filter,
+    test_tag_filters=cpu_x86_tag_filter,
+    options=_DEFAULT_BAZEL_OPTIONS,
+)
+
+_XLA_LINUX_ARM64_CPU_16_VCPU_PRESUBMIT_GITHUB_ACTIONS_BUILD = Build(
+    type_=BuildType.XLA_LINUX_ARM64_CPU_16_VCPU_PRESUBMIT_GITHUB_ACTIONS,
+    repo="openxla/xla",
+    configs=("warnings", "rbe_cross_compile_linux_arm64", "nonccl"),
+    target_patterns=_XLA_CPU_PRESUBMIT_BENCHMARKS_DEFAULT_TARGET_PATTERNS,
+    options={**_DEFAULT_BAZEL_OPTIONS, "build_tests_only": False},
+    build_tag_filters=cpu_arm_tag_filter,
+    test_tag_filters=cpu_arm_tag_filter,
 )
 
 macos_tag_filter = (
