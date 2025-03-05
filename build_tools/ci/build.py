@@ -309,7 +309,7 @@ _XLA_LINUX_ARM64_CPU_16_VCPU_PRESUBMIT_GITHUB_ACTIONS_BUILD = Build(
     repo="openxla/xla",
     configs=("warnings", "rbe_cross_compile_linux_arm64", "nonccl"),
     target_patterns=_XLA_CPU_PRESUBMIT_BENCHMARKS_DEFAULT_TARGET_PATTERNS,
-    options={**_DEFAULT_BAZEL_OPTIONS, "build_tests_only": False},
+    #options={**_DEFAULT_BAZEL_OPTIONS, "build_tests_only": False},
     build_tag_filters=cpu_arm_tag_filter,
     test_tag_filters=cpu_arm_tag_filter,
 )
