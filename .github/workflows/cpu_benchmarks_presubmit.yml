@@ -95,8 +95,7 @@ jobs:
         working-directory: xla #Run Bazel query inside the checked out directory
       - name: List bazel-out contents
         run: |
-          echo "Listing bazel-out contents:"
-          ls -l ${{ github.workspace }}/xla/bazel-out/
+          find bazel-out/ -name "run_hlo_module" -executable
 
       - name: List Artifacts (Attempt 1)
         run: |
