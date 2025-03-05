@@ -77,7 +77,9 @@ jobs:
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
       - name: "Run build.py"
-        run: ./build_tools/ci/build.py --build="${{ matrix.job_info.pretty_name }}_github_actions"
+        run: |
+          pwd
+          ./build_tools/ci/build.py --build="${{ matrix.job_info.pretty_name }}_github_actions"
 
       # - name: List Workspace Contents
       #   run: |
