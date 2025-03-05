@@ -98,7 +98,6 @@ jobs:
           echo "Running bazel query:"
           bazel query '//xla/tools:run_hlo_module' --output build
 
-      - name: List Artifacts (Attempt 1)
-        run: |
-          echo "Listing files in bazel-bin/xla/tools (Attempt 1):"
-          ls -l ${{ github.workspace }}/bazel-bin/xla/tools
+      - name: Run xla/tests/fuzz/rand_000001.hlo and collect runtime and compile time
+        run: ${{ github.workspace }}/xla/bazel-out/aarch64-opt/bin/xla/tools/run_hlo_module --input_format=hlo --platform=CPU xla/tests/fuzz/rand_000001.hlo
+
