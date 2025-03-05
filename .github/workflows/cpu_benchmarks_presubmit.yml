@@ -78,17 +78,25 @@ jobs:
 
       - name: "Run build.py"
         run: ./build_tools/ci/build.py --build="${{ matrix.job_info.pretty_name }}_github_actions"
-      
-      # TODO(juliagmt): add workflow to run performance tests.
-      - name: Run xla/tests/fuzz/rand_000001.hlo and collect runtime and compile time
-        run: |
-          ls
-      - name: List Artifacts
-        run: |
-          echo "Listing files in bazel-bin/xla/tools:"
-          ls -l ${{ github.workspace }}/bazel-bin/xla/tools
+        env:
+            GITHUB_WORKSPACE: ${{ github.workspace }}
 
-      - name: Print run_hlo_module Path (Example)
+      - name: List Workspace Contents
         run: |
-          echo "run_hlo_module path:"
-          echo "${{ github.workspace }}/bazel-bin/xla/tools/run_hlo_module" # No Extension
+          echo "Listing workspace root:"
+          ls -l ${{ github.workspace }}
+
+      - name: Bazel Info
+        run: |
+          echo "Running bazel info:"
+          bazel info
+
+      - name: Bazel Query
+        run: |
+          echo "Running bazel query:"
+          bazel query '//xla/tools:run_hlo_module' --output build
+
+      - name: List Artifacts (Attempt 1)
+        run: |
+          echo "Listing files in bazel-bin/xla/tools (Attempt 1):"
+          ls -l ${{ github.workspace }}/bazel-bin/xla/tools
