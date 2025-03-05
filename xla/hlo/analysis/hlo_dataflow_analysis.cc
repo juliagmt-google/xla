@@ -1707,13 +1707,16 @@ absl::StatusOr<std::unique_ptr<HloDataflowAnalysis>> HloDataflowAnalysis::Run(
     const HloModule& module, bool ssa_form, bool bitcast_defines_value,
     const CanShareBuffer& can_share_buffer, const ForwardsValue& forwards_value,
     absl::flat_hash_set<absl::string_view> execution_threads) {
+  std::cout << "HloDataflowAnalysis::Run\n" << std::endl;
   VLOG(1) << "HloDataflowAnalysis::Run on module " << module.name();
   XLA_VLOG_LINES(2, module.ToString());
 
+  std::cout << "HloDataflowAnalysis::Run after ToString\n" << std::endl;
   auto dataflow_analysis = absl::WrapUnique(new HloDataflowAnalysis(
       module, ssa_form, bitcast_defines_value, can_share_buffer, forwards_value,
       execution_threads));
 
+  std::cout << "HloDataflowAnalysis::Run after WrapUnique\n" << std::endl;
   TF_RETURN_IF_ERROR(dataflow_analysis->InitializeInstructionValueSets());
   dataflow_analysis->Propagate();
   dataflow_analysis->OptimizePhiValues();
@@ -1758,7 +1761,7 @@ absl::StatusOr<std::unique_ptr<HloDataflowAnalysis>> HloDataflowAnalysis::Run(
     dataflow_analysis->values_vector_.push_back(pair.second.get());
   }
   absl::c_sort(dataflow_analysis->values_vector_, HloValue::IdLessThan);
-
+  std::cout << "HloDataflowAnalysis::Run after Verify\n" << std::endl;
   TF_DCHECK_OK(dataflow_analysis->Verify());
 
   XLA_VLOG_LINES(1, dataflow_analysis->ToString());
