@@ -96,12 +96,14 @@ jobs:
       - name: Find Binary
         run: |
           #!/bin/bash
-      
+
+          # Use github.workspace to get the workspace path
           workspace_path="${{ github.workspace }}"
+          echo $workspace_path
           binary_name="run_hlo_module"
-      
+          
           binary_path=$(find "$workspace_path" -name "$binary_name*" -executable)
-      
+          
           if [[ -n "$binary_path" ]]; then
             echo "Found binary at: $binary_path"
             echo "::set-output name=binary_path::$binary_path" # Set output for other steps
@@ -109,7 +111,6 @@ jobs:
             echo "Binary not found in workspace."
             exit 1
           fi
-        working-directory: xla
         id: find-binary
       - name: List Artifacts (Attempt 1)
         run: |
