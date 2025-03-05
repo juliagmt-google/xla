@@ -314,6 +314,7 @@ absl::StatusOr<std::vector<Literal>> MakeFakeArguments(
     const HloModule* module, bool pseudo_random, bool use_large_range,
     bool treat_gte_as_data_formatting,
     std::optional<int64_t> max_bits_of_precision, std::minstd_rand0* engine) {
+  std::cout << "MakeFakeArguments\n" << std::endl;
   if (!pseudo_random) {
     return MakeFakeArguments(module, nullptr, use_large_range,
                              treat_gte_as_data_formatting,
@@ -334,7 +335,9 @@ absl::StatusOr<std::vector<Literal>> MakeFakeArguments(
     const HloModule* module, std::minstd_rand0* engine, bool use_large_range,
     bool treat_gte_as_data_formatting,
     std::optional<int64_t> max_bits_of_precision) {
+  std::cout << "MakeFakeArguments\n" << std::endl;
   TF_ASSIGN_OR_RETURN(auto dataflow, HloDataflowAnalysis::Run(*module));
+  std::cout << "After dataflow\n" << std::endl;
   const auto params = module->entry_computation()->parameter_instructions();
   std::vector<Literal> arguments(params.size());
   for (int i = 0; i < params.size(); ++i) {
