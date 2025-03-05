@@ -80,48 +80,31 @@ jobs:
         run: |
           pwd
           ./build_tools/ci/build.py --build="${{ matrix.job_info.pretty_name }}_github_actions"
+         env:
+            GITHUB_WORKSPACE: ${{ github.workspace }}
 
-      # - name: List Workspace Contents
-      #   run: |
-      #     echo "Listing workspace root:"
-      #     ls -l ${{ github.workspace }}
-      #   env:
-      #       GITHUB_WORKSPACE: ${{ github.workspace }}
-
-      - name: Bazel Query
+      - name: Bazel Info
+        id: bazel-info
         run: |
-          echo "Running bazel query:"
-          bazel query '//xla/tools:run_hlo_module' --output build
-        working-directory: xla #Run Bazel query inside the checked out directory
-      - name: Find Binary
-        run: |
-          #!/bin/bash
+          echo "Running bazel info:"
+          bazel info
+          echo "output_base=$(bazel info output_base)" >> $GITHUB_OUTPUT
+        working-directory: xla #Run Bazel info inside the checked out directory
 
-          # Use github.workspace to get the workspace path
-          workspace_path="${{ github.workspace }}"
-          echo $workspace_path
-          binary_name="run_hlo_module"
-          
-          binary_path=$(find "$workspace_path" -name "$binary_name*" -executable)
-          
-          if [[ -n "$binary_path" ]]; then
+      - name: Find Binary (Direct Path)
+        id: find-binary
+        run: |
+          output_base="${{ steps.bazel-info.outputs.output_base }}"
+          workspace_path="${{ github.workspace }}/xla" # Correct workspace path
+          binary_path="$output_base/execroot/xla/bazel-out/aarch64-opt/bin/xla/tools/run_hlo_module" # Correct binary path
+
+          if [[ -x "$binary_path" ]]; then  # Check if the file exists AND is executable
             echo "Found binary at: $binary_path"
-            echo "::set-output name=binary_path::$binary_path" # Set output for other steps
+            echo "::set-output name=binary_path::$binary_path"
           else
-            echo "Binary not found in workspace."
+            echo "Error: Binary not found at expected location: $binary_path"
             exit 1
           fi
-        id: find-binary
-      - name: List Artifacts (Attempt 1)
-        run: |
-          echo "Listing files in bazel-out/aarch64-opt/bin/xla/tools (Attempt 1):"
-          ls -l ${{ github.workspace }}/xla/bazel-out/aarch64-opt/bin/xla/tools
-
-      - name: Print run_hlo_module Path (Attempt 1)
-        run: |
-          echo "run_hlo_module path:"
-          echo "${{ github.workspace }}/xla/bazel-out/aarch64-opt/bin/xla/tools/run_hlo_module
-
       # - name: Run xla/tests/fuzz/rand_000001.hlo and collect runtime and compile time
       #   run: ./bazel-bin/xla/tools/run_hlo_module --input_format=hlo --platform=CPU xla/tests/fuzz/rand_000001.hlo
 
