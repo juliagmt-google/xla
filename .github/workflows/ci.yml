@@ -54,12 +54,12 @@ jobs:
             name: "XLA Linux x86 GPU T4",
             repo: "openxla/xla",
           },
-          {
-            pool: "linux-arm64-c4a-16",
-            container: "us-central1-docker.pkg.dev/tensorflow-sigs/tensorflow/ml-build-arm64:latest",
-            name: "XLA Linux ARM64 CPU",
-            repo: "openxla/xla",
-          },
+          # {
+          #   pool: "linux-arm64-c4a-16",
+          #   container: "us-central1-docker.pkg.dev/tensorflow-sigs/tensorflow/ml-build-arm64:latest",
+          #   name: "XLA Linux ARM64 CPU",
+          #   repo: "openxla/xla",
+          # },
           {
             pool: "linux-x86-n2-16",
             container: "gcr.io/tensorflow-sigs/build:latest-python3.11",
@@ -87,7 +87,7 @@ jobs:
           {
             pool: "arc-linux-arm64-c4a-64-dev", #"linux-arm64-c4a-16",
             container: "us-central1-docker.pkg.dev/tensorflow-sigs/tensorflow/ml-build-arm64:latest",
-            name: "XLA Linux ARM64 CPU DEV",
+            name: "XLA Linux ARM64 CPU",
             repo: "openxla/xla",
           },
         ]
