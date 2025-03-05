@@ -192,6 +192,18 @@ class Build:
         BuildType.XLA_MACOS_ARM64_CPU_KOKORO,
     ):
       cmds.append(self.bazel_command())
+    elif self.type_ in (
+        BuildType.XLA_LINUX_ARM64_CPU_16_VCPU_PRESUBMIT_GITHUB_ACTIONS,
+        BuildType.XLA_LINUX_X86_CPU_16_VCPU_PRESUBMIT_GITHUB_ACTIONS,
+        BuildType.XLA_LINUX_X86_CPU_128_VCPU_PRESUBMIT_GITHUB_ACTIONS,
+    ):
+      cmds.append(
+          retry(
+              self.bazel_command(
+                  subcommand="build",
+              )
+          )
+      )
     else:
       cmds.append(
           retry(
