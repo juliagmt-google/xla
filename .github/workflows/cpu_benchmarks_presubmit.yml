@@ -78,7 +78,6 @@ jobs:
 
       - name: "Run build.py"
         run: ./build_tools/ci/build.py --build="${{ matrix.job_info.pretty_name }}_github_actions"
-        working-directory: xla
 
       # - name: List Workspace Contents
       #   run: |
