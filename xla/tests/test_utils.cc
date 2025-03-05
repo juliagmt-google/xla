@@ -126,6 +126,7 @@ bool ReachableViaDataFormatting(const HloInstruction* src,
 std::vector<HloInstruction*> FindConstrainedUses(
     const HloDataflowAnalysis& dataflow, const HloInstruction& param,
     bool treat_gte_as_data_formatting) {
+  std::cout << "FindConstrainedUses\n" << std::endl;
   std::vector<HloInstruction*> constrained_uses;
   for (const auto& pair : dataflow.GetInstructionValueSet(&param)) {
     const HloValue& value = dataflow.GetUniqueValueAt(&param, pair.first);
@@ -166,7 +167,7 @@ std::vector<HloInstruction*> FindConstrainedUses(
       }
     }
   }
-
+  std::cout << "After FindConstrainedUses\n" << std::endl;
   for (auto* instruction : param.parent()->instructions()) {
     const HloOpcode opcode = instruction->opcode();
     if (opcode == HloOpcode::kGather || opcode == HloOpcode::kScatter) {
@@ -180,6 +181,7 @@ std::vector<HloInstruction*> FindConstrainedUses(
       }
     }
   }
+  std::cout << "After ReachableViaDataFormatting\n" << std::endl;
   return constrained_uses;
 }
 
@@ -301,6 +303,7 @@ absl::StatusOr<Literal> MakeConstrainedArgument(
     const Shape& param_shape, std::minstd_rand0* engine, bool use_large_range,
     bool treat_gte_as_data_formatting,
     std::optional<int64_t> max_bits_of_precision) {
+  std::cout << "MakeConstrainedArgument\n" << std::endl;
   const auto constrained_uses =
       FindConstrainedUses(dataflow, param, treat_gte_as_data_formatting);
   return CreateLiteralForConstrainedUses(constrained_uses, param, param_shape,
