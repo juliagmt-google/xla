@@ -89,7 +89,7 @@ jobs:
           echo "output_base=$(bazel info output_base)" >> $GITHUB_OUTPUT
         working-directory: xla #Run Bazel info inside the checked out directory
 
-       - name: Get Executable Path with Bazel Query
+      - name: Get Executable Path with Bazel Query
         id: get-binary-path
         run: |
           # Directly query for the location of the binary with the correct Bazel output
