@@ -38,6 +38,11 @@ jobs:
             pretty_name: "XLA Linux ARM64 CPU",
           },
           {
+            os: "arc-linux-arm64-c4a-64-dev", #"linux-arm64-c4a-16",
+            container: "us-central1-docker.pkg.dev/tensorflow-sigs/tensorflow/ml-build-arm64:latest",
+            pretty_name: "XLA Linux ARM64 CPU DEV",
+          },
+          {
             os: "linux-x86-n2-128",
             container: "us-central1-docker.pkg.dev/tensorflow-sigs/tensorflow/ml-build:latest",
             pretty_name: "XLA Linux x86 CPU with 128 vcpu",
@@ -85,25 +90,26 @@ jobs:
           df -h    # Disk space information
           uname -a # Kernel information
 
-      - name: Run E2E benchmarks flax_2b
-        timeout-minutes: 60
-        run: |
-          cd xla/backends/cpu/benchmarks/e2e/gemma2/flax_2b
-          bash setup.sh
-          bash run.sh | tee -a ../../../../../../../results/flax_2b.log
+      # - name: Run E2E benchmarks flax_2b
+      #   timeout-minutes: 60
+      #   run: |
+      #     cd xla/backends/cpu/benchmarks/e2e/gemma2/flax_2b
+      #     bash setup.sh
+      #     bash run.sh | tee -a ../../../../../../../results/flax_2b.log
 
-      - name: Configure CPU backend
-        run: |
-          ./configure.py --backend=CPU
+      # - name: Configure CPU backend
+      #   run: |
+      #     ./configure.py --backend=CPU
 
       - name: Build run_hlo_module
         run: bazel build -c opt --dynamic_mode=off xla/tools:run_hlo_module
 
-      - name: Run xla/tests/fuzz/rand_000001.hlo and collect runtime and compile time
-        run: ./bazel-bin/xla/tools/run_hlo_module --input_format=hlo --platform=CPU xla/tests/fuzz/rand_000001.hlo
+      # - name: Run xla/tests/fuzz/rand_000001.hlo and collect runtime and compile time
+      #   run: ./bazel-bin/xla/tools/run_hlo_module --input_format=hlo --platform=CPU xla/tests/fuzz/rand_000001.hlo
 
       - name: Download and run Gemma2 2B HLO and collect runtime and compile time
         run: |
+          set -x
           mkdir -p tmp_hlo
           cd tmp_hlo
           wget https://storage.googleapis.com/xla-benchmarking-temp/gemma2_2b_keras_jax.hlo
