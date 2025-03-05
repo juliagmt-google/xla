@@ -73,27 +73,13 @@ jobs:
           df -h    # Disk space information
           uname -a # Kernel information
 
-      - name: Check Python Version in Container
-        run: python3 --version
-
-      - name: Install Python 3.10 if not present (IN CONTAINER)
-        run: |
-          if ! python3 --version > /dev/null 2>&1; then # check for python3
-            echo "Python 3 not found, installing..."
-            apt-get update
-            apt-get install -y python3.10 python3-pip
-          else
-            echo "Python 3 found."
-          fi
-
       - name: Checkout OpenXLA
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-
-      - name: "Wait For Connection"
-        uses: google-ml-infra/actions/ci_connection@main
-        with:
-          halt-dispatch-input: ${{ inputs.halt-for-connection }}
 
       - name: "Run build.py"
         run: ./build_tools/ci/build.py --build="${{ matrix.job_info.pretty_name }}_github_actions"
       # TODO(juliagmt): add workflow to run performance tests.
+      - name: "Wait For Connection"
+        uses: google-ml-infra/actions/ci_connection@main
+        with:
+          halt-dispatch-input: ${{ inputs.halt-for-connection }}
