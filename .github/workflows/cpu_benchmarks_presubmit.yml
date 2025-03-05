@@ -88,16 +88,22 @@ jobs:
       #   env:
       #       GITHUB_WORKSPACE: ${{ github.workspace }}
 
-      - name: Bazel Info
-        run: |
-          echo "Running bazel info:"
-          bazel info
-
       - name: Bazel Query
         run: |
           echo "Running bazel query:"
           bazel query '//xla/tools:run_hlo_module' --output build
+        working-directory: xla #Run Bazel query inside the checked out directory
 
-      - name: Run xla/tests/fuzz/rand_000001.hlo and collect runtime and compile time
-        run: bazel run //xla/tools/run_hlo_module --input_format=hlo --platform=CPU xla/tests/fuzz/rand_000001.hlo
+      - name: List Artifacts (Attempt 1)
+        run: |
+          echo "Listing files in bazel-out/aarch64-opt/bin/xla/tools (Attempt 1):"
+          ls -l ${{ github.workspace }}/xla/bazel-out/aarch64-opt/bin/xla/tools
+
+      - name: Print run_hlo_module Path (Attempt 1)
+        run: |
+          echo "run_hlo_module path:"
+          echo "${{ github.workspace }}/xla/bazel-out/aarch64-opt/bin/xla/tools/run_hlo_module
+
+      # - name: Run xla/tests/fuzz/rand_000001.hlo and collect runtime and compile time
+      #   run: bazel run //xla/tools/run_hlo_module --input_format=hlo --platform=CPU xla/tests/fuzz/rand_000001.hlo
 
