@@ -99,5 +99,5 @@ jobs:
           bazel query '//xla/tools:run_hlo_module' --output build
 
       - name: Run xla/tests/fuzz/rand_000001.hlo and collect runtime and compile time
-        run: ${{ github.workspace }}/bazel-out/aarch64-opt/bin/xla/tools/run_hlo_module --input_format=hlo --platform=CPU xla/tests/fuzz/rand_000001.hlo
+        run: bazel run //xla/tools/run_hlo_module --input_format=hlo --platform=CPU xla/tests/fuzz/rand_000001.hlo
 
