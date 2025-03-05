@@ -87,3 +87,12 @@ jobs:
       - name: Run xla/tests/fuzz/rand_000001.hlo and collect runtime and compile time
         run: |
           ls
+      - name: List Artifacts
+        run: |
+          echo "Listing files in bazel-bin/xla/tools:"
+          ls -l ${{ github.workspace }}/bazel-bin/xla/tools
+
+      - name: Print run_hlo_module Path (Example)
+        run: |
+          echo "run_hlo_module path:"
+          echo "${{ github.workspace }}/bazel-bin/xla/tools/run_hlo_module" # No Extension
