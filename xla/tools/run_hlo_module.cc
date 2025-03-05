@@ -193,7 +193,7 @@ absl::Status RunAndCompareInternal(
     }
     return status;
   };
-
+  std::cout << "After copy_result_on_failure\n" << std::endl;
   if (!config_modifier_hook) {
     config_modifier_hook = [](HloModuleConfig* config) {
       config->set_seed(42);
@@ -208,7 +208,7 @@ absl::Status RunAndCompareInternal(
                                ModuleResult::kCompilationError, test_run_result)
             .status());
   }
-
+  std::cout << "After HloControlFlowFlattening\n" << std::endl;
   TF_ASSIGN_OR_RETURN(
       auto args, copy_result_on_failure(
                      MakeFakeArguments(test_module.get(), engine,
@@ -216,7 +216,8 @@ absl::Status RunAndCompareInternal(
                                        options.treat_gte_as_data_formatting),
                      ModuleResult::kOtherError, test_run_result));
   // Use provided input literals as arguments, if any.
-  if (iteration_literals_proto != nullptr &&
+std::cout << "After MakeFakeArguments\n" << std::endl;  
+if (iteration_literals_proto != nullptr &&
       iteration_literals_proto->arguments_size() != 0) {
     if (iteration_literals_proto->arguments_size() != args.size()) {
       if (test_run_result != nullptr) {
@@ -247,6 +248,7 @@ absl::Status RunAndCompareInternal(
       }
     }
   }
+  std::cout << "After iteration_literals_proto\n" << std::endl;
   if (options.print_literals) {
     for (int i = 0; i < args.size(); ++i) {
       std::cout << "\n** Argument " << i << " **\n"
@@ -282,7 +284,7 @@ absl::Status RunAndCompareInternal(
   if (options.force_use_cpu_thunk_runtime_for_test) {
     UseCpuThunkRuntime(*test_module);
   }
-
+  std::cout << "Before ExecuteWithRunner\n" << std::endl;
   TF_ASSIGN_OR_RETURN(
       auto test_result,
       copy_result_on_failure(
