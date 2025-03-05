@@ -312,6 +312,6 @@ int main(int argc, char** argv) {
       }
     }
   }
-
+  std::cout << "Done." << std::endl;
   return failure_count == 0 ? 0 : -1;
 }
