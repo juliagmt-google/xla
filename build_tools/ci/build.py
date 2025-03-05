@@ -187,34 +187,19 @@ class Build:
     # problems in practice.
     # TODO(ddunleavy): Remove the condition here. Need to get parallel on the
     # MacOS VM.
-    if (
-        self.type_ != BuildType.XLA_MACOS_X86_CPU_KOKORO
-        and self.type_ != BuildType.XLA_MACOS_ARM64_CPU_KOKORO
+    if self.type_ in (
+        BuildType.XLA_MACOS_X86_CPU_KOKORO,
+        BuildType.XLA_MACOS_ARM64_CPU_KOKORO,
     ):
-      cmds.append(
-          retry(
-              self.bazel_command(
-                  subcommand="build", extra_options=("--nobuild",)
-              )
-          )
-      )
-    elif (
-        self.type_
-        == BuildType.XLA_LINUX_ARM64_CPU_16_VCPU_PRESUBMIT_GITHUB_ACTIONS
-        or self.type_
-        == BuildType.XLA_LINUX_X86_CPU_16_VCPU_PRESUBMIT_GITHUB_ACTIONS
-        or self.type_
-        == BuildType.XLA_LINUX_X86_CPU_128_VCPU_PRESUBMIT_GITHUB_ACTIONS
-    ):
-      cmds.append(
-          retry(
-              self.bazel_command(
-                  subcommand="build", extra_options=("--nobuild",)
-              )
-          )
-      )
+      cmds.append(self.bazel_command())
     else:
-       cmds.append(self.bazel_command())
+      cmds.append(
+          retry(
+              self.bazel_command(
+                  subcommand="build", extra_options=("--nobuild",)
+              )
+          )
+      )
     cmds.append(["bazel", "analyze-profile", "profile.json.gz"])
 
     return cmds
