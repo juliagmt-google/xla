@@ -97,9 +97,9 @@ jobs:
       #     bash setup.sh
       #     bash run.sh | tee -a ../../../../../../../results/flax_2b.log
 
-      # - name: Configure CPU backend
-      #   run: |
-      #     ./configure.py --backend=CPU
+      - name: Configure CPU backend
+        run: |
+          ./configure.py --backend=CPU
 
       - name: Build run_hlo_module
         run: bazel build -c opt --dynamic_mode=off xla/tools:run_hlo_module
