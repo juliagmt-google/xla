@@ -80,8 +80,6 @@ jobs:
         run: |
           pwd
           ./build_tools/ci/build.py --build="${{ matrix.job_info.pretty_name }}_github_actions"
-         env:
-            GITHUB_WORKSPACE: ${{ github.workspace }}
 
       - name: Bazel Info
         id: bazel-info
