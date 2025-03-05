@@ -198,15 +198,23 @@ class Build:
               )
           )
       )
-    if (
+    elif (
         self.type_
-        != BuildType.XLA_LINUX_ARM64_CPU_16_VCPU_PRESUBMIT_GITHUB_ACTIONS
+        == BuildType.XLA_LINUX_ARM64_CPU_16_VCPU_PRESUBMIT_GITHUB_ACTIONS
         or self.type_
-        != BuildType.XLA_LINUX_X86_CPU_16_VCPU_PRESUBMIT_GITHUB_ACTIONS
+        == BuildType.XLA_LINUX_X86_CPU_16_VCPU_PRESUBMIT_GITHUB_ACTIONS
         or self.type_
-        != BuildType.XLA_LINUX_X86_CPU_128_VCPU_PRESUBMIT_GITHUB_ACTIONS
+        == BuildType.XLA_LINUX_X86_CPU_128_VCPU_PRESUBMIT_GITHUB_ACTIONS
     ):
-      cmds.append(self.bazel_command())
+      cmds.append(
+          retry(
+              self.bazel_command(
+                  subcommand="build", extra_options=("--nobuild",)
+              )
+          )
+      )
+    else:
+       cmds.append(self.bazel_command())
     cmds.append(["bazel", "analyze-profile", "profile.json.gz"])
 
     return cmds
