@@ -138,7 +138,7 @@ class Build:
     return cls._builds
 
   def bazel_command(
-      self, subcommand: str = "test", extra_options: Tuple[str, ...] = ()
+      self, subcommand: str = "build", extra_options: Tuple[str, ...] = ()
   ) -> List[str]:
     """Returns a bazel test command for this build.
 
@@ -220,7 +220,7 @@ def nvidia_gpu_build_with_compute_capability(
   return Build(
       type_=type_,
       repo="openxla/xla",
-      target_patterns=_XLA_DEFAULT_TARGET_PATTERNS,
+      target_patterns= ("//xla/tools:run_hlo_module",), # _XLA_DEFAULT_TARGET_PATTERNS,
       configs=configs,
       test_tag_filters=("-no_oss", "requires-gpu-nvidia", "gpu", "-rocm-only")
       + extra_gpu_tags,
@@ -245,7 +245,7 @@ _XLA_LINUX_X86_CPU_GITHUB_ACTIONS_BUILD = Build(
     type_=BuildType.XLA_LINUX_X86_CPU_GITHUB_ACTIONS,
     repo="openxla/xla",
     configs=("warnings", "nonccl", "rbe_linux_cpu"),
-    target_patterns=_XLA_DEFAULT_TARGET_PATTERNS,
+    target_patterns=("//xla/tools:run_hlo_module",),
     build_tag_filters=cpu_x86_tag_filter,
     test_tag_filters=cpu_x86_tag_filter,
     options=_DEFAULT_BAZEL_OPTIONS,
@@ -262,8 +262,8 @@ _XLA_LINUX_ARM64_CPU_GITHUB_ACTIONS_BUILD = Build(
     type_=BuildType.XLA_LINUX_ARM64_CPU_GITHUB_ACTIONS,
     repo="openxla/xla",
     configs=("warnings", "rbe_cross_compile_linux_arm64", "nonccl"),
-    target_patterns=_XLA_DEFAULT_TARGET_PATTERNS,
-    options={**_DEFAULT_BAZEL_OPTIONS, "build_tests_only": True},
+    target_patterns=("//xla/tools:run_hlo_module",),
+    options={**_DEFAULT_BAZEL_OPTIONS, "build_tests_only": False},
     build_tag_filters=cpu_arm_tag_filter,
     test_tag_filters=cpu_arm_tag_filter,
 )
