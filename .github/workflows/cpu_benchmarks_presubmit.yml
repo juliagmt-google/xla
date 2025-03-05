@@ -81,10 +81,12 @@ jobs:
         env:
             GITHUB_WORKSPACE: ${{ github.workspace }}
 
-      - name: List Workspace Contents
-        run: |
-          echo "Listing workspace root:"
-          ls -l ${{ github.workspace }}
+      # - name: List Workspace Contents
+      #   run: |
+      #     echo "Listing workspace root:"
+      #     ls -l ${{ github.workspace }}
+      #   env:
+      #       GITHUB_WORKSPACE: ${{ github.workspace }}
 
       - name: Bazel Info
         run: |
