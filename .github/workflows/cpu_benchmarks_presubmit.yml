@@ -97,7 +97,7 @@ jobs:
         run: |
           #!/bin/bash
       
-          workspace_path="${{ github.workspace }}/xla"
+          workspace_path="${{ github.workspace }}"
           binary_name="run_hlo_module"
       
           binary_path=$(find "$workspace_path" -name "$binary_name*" -executable)
