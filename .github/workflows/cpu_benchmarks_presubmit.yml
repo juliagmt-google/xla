@@ -89,18 +89,29 @@ jobs:
           echo "output_base=$(bazel info output_base)" >> $GITHUB_OUTPUT
         working-directory: xla #Run Bazel info inside the checked out directory
 
-      - name: Find Binary (Direct Path)
-        id: find-binary
+       - name: Get Executable Path with Bazel Query
+        id: get-binary-path
         run: |
-          output_base="${{ steps.bazel-info.outputs.output_base }}"
-          workspace_path="${{ github.workspace }}/xla" # Correct workspace path
-          binary_path="$output_base/execroot/xla/bazel-out/aarch64-opt/bin/xla/tools/run_hlo_module" # Correct binary path
+          # Directly query for the location of the binary with the correct Bazel output
+          # We look for attribute "outs", attribute "executable", output with just file name.
+          executable_path=$(bazel query 'attr(outs, //xla/tools:run_hlo_module, executable)'  --output=location | tr -d \')
 
-          if [[ -x "$binary_path" ]]; then  # Check if the file exists AND is executable
-            echo "Found binary at: $binary_path"
-            echo "::set-output name=binary_path::$binary_path"
+          if [[ -n "$executable_path" ]]; then
+              echo "Found executable path: $executable_path"
+              echo "::set-output name=binary_path::$executable_path"
           else
-            echo "Error: Binary not found at expected location: $binary_path"
+              echo "Executable not found using bazel query"
+              exit 1
+          fi
+        working-directory: xla
+
+      - name: Verify Binary Existence
+        run: |
+          binary_path="${{ steps.get-binary-path.outputs.binary_path }}"
+          if [[ -x "$binary_path" ]]; then
+            echo "Binary exists and is executable: $binary_path"
+          else
+            echo "Error: Binary not found or is not executable at: $binary_path"
             exit 1
           fi
       # - name: Run xla/tests/fuzz/rand_000001.hlo and collect runtime and compile time
