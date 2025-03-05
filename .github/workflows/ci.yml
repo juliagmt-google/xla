@@ -84,6 +84,12 @@ jobs:
             name: "TensorFlow Linux x86 GPU T4",
             repo: "tensorflow/tensorflow",
           },
+          {
+            pool: "arc-linux-arm64-c4a-64-dev", #"linux-arm64-c4a-16",
+            container: "us-central1-docker.pkg.dev/tensorflow-sigs/tensorflow/ml-build-arm64:latest",
+            name: "XLA Linux ARM64 CPU DEV",
+            repo: "openxla/xla",
+          },
         ]
     name: ${{ matrix.job_info.name }}
     runs-on: ${{ matrix.job_info.pool }}
