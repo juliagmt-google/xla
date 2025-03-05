@@ -185,6 +185,7 @@ absl::Status RunAndCompareInternal(
         reference_module_modifier_hook,
     std::function<void(HloModuleConfig*)> config_modifier_hook,
     ModuleResult* test_run_result, ModuleResult* reference_run_result) {
+  std::cout << "RunAndCompareInternal\n" << std::endl;
   auto copy_result_on_failure = [](auto status, ModuleResult result,
                                    ModuleResult* out_result) {
     if (!status.ok() && out_result != nullptr) {
@@ -438,6 +439,7 @@ absl::Status RunIsolatedAndCompare(
                                HloModule*)>
         reference_module_modifier_hook,
     std::function<void(HloModuleConfig*)> config_modifier_hook) {
+  std::cout << "RunIsolatedAndCompare\n" << std::endl;
   CHECK(test_module);
   CHECK(iteration_literals_proto == nullptr)
       << "Cannot run decomposed module if input literals are provided.";
@@ -461,6 +463,7 @@ absl::Status RunIsolatedAndCompare(
     const std::string module_name = module->name();
     ModuleResult test_module_result = ModuleResult::kDidntRun;
     ModuleResult reference_module_result = ModuleResult::kDidntRun;
+    std::cout << "Before RunAndCompareInternal\n" << std::endl;
     absl::Status chunk_status = RunAndCompareInternal(
         std::move(module), buffer_assignment_proto, test_runner,
         reference_runner, engine, options, iteration_literals_proto,
@@ -511,11 +514,13 @@ absl::Status RunAndCompare(
     std::function<absl::Status(const RunHloModuleOptions& options,
                                HloModule& module)>
         compilation_env_modifier_hook) {
+  std::cout << "RunAndCompare\n" << std::endl;
   std::string input_format = options.input_format;
   if (input_format.empty()) {
     input_format = std::string(tsl::io::Extension(hlo_filename));
   }
   BufferAssignmentProto buffer_assignment_proto;
+  std::cout << "Loading HLO file " << hlo_filename << "\n";
   TF_ASSIGN_OR_RETURN(
       auto test_module,
       LoadModuleFromFile(
@@ -527,6 +532,7 @@ absl::Status RunAndCompare(
       HloVerifierOpts{}.WithLayoutSensitive(false).WithAllowMixedPrecision(
           true));
   TF_RETURN_IF_ERROR(verifier.Run(test_module.get()).status());
+  std::cout << "Loaded HLO file " << hlo_filename << "\n" << std::endl;
   if (compilation_env_modifier_hook) {
     TF_CHECK_OK(compilation_env_modifier_hook(options, *test_module))
         << "Could not adjust the compilation environment for user provided "
@@ -552,6 +558,7 @@ absl::Status RunAndCompare(
           << "Ignoring input data from snapshot and using fake data instead.";
     }
   }
+  std::cout << "Before RunAndCompare\n" << std::endl;
   return RunAndCompare(
       std::move(test_module),
       options.use_buffer_assignment_from_proto ? &buffer_assignment_proto
