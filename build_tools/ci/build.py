@@ -200,7 +200,7 @@ class Build:
       cmds.append(
           retry(
               self.bazel_command(
-                  subcommand="build",
+                  subcommand="build", extra_options=("--nobuild",)
               )
           )
       )
