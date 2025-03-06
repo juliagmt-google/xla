@@ -81,4 +81,28 @@ jobs:
           ./build_tools/ci/build.py --build="${{ matrix.job_info.pretty_name }}_github_actions"
       - name: Run xla/tests/fuzz/rand_000001.hlo and collect runtime and compile time
         run: ./bazel-out/aarch64-opt/bin/xla/tools/run_hlo_module --input_format=hlo --reference_platform="" --platform=CPU xla/tests/fuzz/rand_000001.hlo
+
+      - name: Get Executable Path with Bazel Query
+        id: get-binary-path
+        run: |
+          # Determine the architecture-specific path using bazel query
+          # Note: This assumes the binary is always named "run_hlo_module"
+          #Adjust working-directory
+          executable_path=$(bazel query 'attr(outs, //xla/tools:run_hlo_module, executable)'  --output=location )
+
+          if [[ -n "$executable_path" ]]; then
+              echo "Found executable path: $executable_path"
+              echo "::set-output name=binary_path::$executable_path"
+          else
+              echo "Error: Executable not found using bazel query"
+              exit 1
+          fi
+        working-directory: . #Important to have correct working directory
+
+      - name: Run xla/tests/fuzz/rand_000001.hlo
+        run: |
+          binary_path="${{ steps.get-binary-path.outputs.binary_path }}"
+          echo "Running test with binary: $binary_path"
+          $binary_path --input_format=hlo --reference_platform="" --platform=CPU xla/tests/fuzz/rand_000001.hlo
+
   
