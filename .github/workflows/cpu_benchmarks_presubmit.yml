@@ -46,16 +46,19 @@ jobs:
             pool: "linux-x86-n2-16",
             container: "us-central1-docker.pkg.dev/tensorflow-sigs/tensorflow/ml-build:latest",
             pretty_name: "XLA Linux x86 CPU 16 vcpu Presubmit",
+            bazel_arch_dir: "k8-opt"
           },
           {
             pool: "arc-linux-arm64-c4a-64-dev", #"linux-arm64-c4a-16",
             container: "us-central1-docker.pkg.dev/tensorflow-sigs/tensorflow/ml-build-arm64:latest",
             pretty_name: "XLA Linux ARM64 CPU 16 vcpu Presubmit",
+            bazel_arch_dir: "aarch64-opt"
           },
           {
             pool: "linux-x86-n2-128",
             container: "us-central1-docker.pkg.dev/tensorflow-sigs/tensorflow/ml-build:latest",
             pretty_name: "XLA Linux x86 CPU 128 vcpu Presubmit",
+            bazel_arch_dir: "k8-opt"
           }
         ]
     name: ${{ matrix.job_info.pretty_name }}
@@ -101,8 +104,13 @@ jobs:
 
       - name: Run xla/tests/fuzz/rand_000001.hlo
         run: |
-          binary_path="${{ steps.get-binary-path.outputs.binary_path }}"
+          bazel_arch_dir="${{ matrix.job_info.bazel_arch_dir }}"  # Get directory from matrix
+          binary_path="./bazel-out/${bazel_arch_dir}/bin/xla/tools/run_hlo_module"
           echo "Running test with binary: $binary_path"
-          $binary_path --input_format=hlo --reference_platform="" --platform=CPU xla/tests/fuzz/rand_000001.hlo
-
-  
+          if [[ -x "$binary_path" ]]; then
+            echo "Running test with binary: $binary_path"
+            $binary_path --input_format=hlo --reference_platform="" --platform=CPU xla/tests/fuzz/rand_000001.hlo
+          else
+            echo "Error: Binary not found at expected location: $binary_path"
+            exit 1
+          fi
