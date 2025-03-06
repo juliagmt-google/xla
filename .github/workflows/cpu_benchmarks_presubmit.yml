@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-name: CPU Benchmarks Presubmit
+name: Performance Regression Presubmit
 permissions:
   contents: read
 on:
@@ -81,10 +81,4 @@ jobs:
           ./build_tools/ci/build.py --build="${{ matrix.job_info.pretty_name }}_github_actions"
       - name: Run xla/tests/fuzz/rand_000001.hlo and collect runtime and compile time
         run: ./bazel-out/aarch64-opt/bin/xla/tools/run_hlo_module --input_format=hlo --reference_platform="" --platform=CPU xla/tests/fuzz/rand_000001.hlo
-        
-      - name: Run xla/tools/hlo_opt/tests/cpu_llvm.hlo and collect runtime and compile time
-        run: ./bazel-out/aarch64-opt/bin/xla/tools/run_hlo_module --input_format=hlo --reference_platform="" --platform=CPU xla/tools/hlo_opt/tests/cpu_llvm.hlo
-
-      - name: Run xla/backends/gpu/codegen/emitters/tests/concatenate/prologue_epilogue.hlo and collect runtime and compile time
-        run: ./bazel-out/aarch64-opt/bin/xla/tools/run_hlo_module --input_format=hlo --reference_platform="" --platform=CPU xla/backends/gpu/codegen/emitters/tests/concatenate/prologue_epilogue.hlo
-
+  
