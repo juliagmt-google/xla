@@ -1,18 +1,4 @@
-# Copyright 2025 The OpenXLA Authors. All Rights Reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# ============================================================================
-name: Performance Regression Presubmit
+name: Presubmit Benchmarks
 permissions:
   contents: read
 on:
@@ -22,19 +8,19 @@ on:
         description: 'Should this workflow run wait for a remote connection?'
         type: choice
         required: true
-        default: 'yes'
+        default: 'no'
         options:
         - 'yes'
         - 'no'
   pull_request:
   push:
     branches:
-      - dev
+      - main
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: ${{ github.ref != 'main' }}
-  
+
 jobs:
   Tests:
     strategy:
@@ -43,26 +29,33 @@ jobs:
       matrix:
         job_info: [
           {
-            os: "linux-x86-n2-16",
+            pool: "linux-x86-n2-16",
             container: "us-central1-docker.pkg.dev/tensorflow-sigs/tensorflow/ml-build:latest",
-            pretty_name: "XLA Linux x86 CPU with 16 vcpu",
+            pretty_name: "XLA Linux x86 CPU 16 vcpu Presubmit",
             bazel_arch_dir: "k8-opt",
             platform: "CPU"
           },
           {
-            pool: "arc-linux-arm64-c4a-64-dev", #"linux-arm64-c4a-16",
+            pool: "linux-arm64-c4a-16",
             container: "us-central1-docker.pkg.dev/tensorflow-sigs/tensorflow/ml-build-arm64:latest",
             pretty_name: "XLA Linux ARM64 CPU 16 vcpu Presubmit",
             bazel_arch_dir: "aarch64-opt",
             platform: "CPU"
           },
           {
-            os: "linux-x86-n2-128",
+            pool: "linux-x86-n2-128",
             container: "us-central1-docker.pkg.dev/tensorflow-sigs/tensorflow/ml-build:latest",
-            pretty_name: "XLA Linux x86 CPU with 128 vcpu",
+            pretty_name: "XLA Linux x86 CPU 128 vcpu Presubmit",
             bazel_arch_dir: "k8-opt",
             platform: "CPU"
-          }
+          },
+          {
+            pool: "linux-x86-g2-16-l4-1gpu",
+            container: "us-central1-docker.pkg.dev/tensorflow-sigs/tensorflow/ml-build:latest",
+            pretty_name: "XLA Linux x86 GPU T4 16 vcpu Presubmit",
+            bazel_arch_dir: "k8-opt",
+            platform: "GPU"
+          },
         ]
     name: ${{ matrix.job_info.pretty_name }}
     runs-on: ${{ matrix.job_info.pool }}
@@ -78,14 +71,16 @@ jobs:
           free -h  # Memory information
           df -h    # Disk space information
           uname -a # Kernel information
+
       - name: Checkout OpenXLA
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
       - name: "Run build.py"
         run: |
           ./build_tools/ci/build.py --build="${{ matrix.job_info.pretty_name }}_github_actions"
-      # Run the corresponding HLO test based on platform
-      - name: Run HLO test
+
+      # Run the corresponding HLO tests based on platform
+      - name: Run HLO tests
         run: |
           bazel_arch_dir="${{ matrix.job_info.bazel_arch_dir }}"  # Get directory from matrix
           binary_path="./bazel-out/${bazel_arch_dir}/bin/xla/tools/run_hlo_module"
