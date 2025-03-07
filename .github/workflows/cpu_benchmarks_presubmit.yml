@@ -46,21 +46,21 @@ jobs:
             os: "linux-x86-n2-16",
             container: "us-central1-docker.pkg.dev/tensorflow-sigs/tensorflow/ml-build:latest",
             pretty_name: "XLA Linux x86 CPU with 16 vcpu",
-            bazel_arch_dir: "k8-opt"
+            bazel_arch_dir: "k8-opt",
             platform: "CPU"
           },
           {
             pool: "arc-linux-arm64-c4a-64-dev", #"linux-arm64-c4a-16",
             container: "us-central1-docker.pkg.dev/tensorflow-sigs/tensorflow/ml-build-arm64:latest",
             pretty_name: "XLA Linux ARM64 CPU 16 vcpu Presubmit",
-            bazel_arch_dir: "aarch64-opt"
+            bazel_arch_dir: "aarch64-opt",
             platform: "CPU"
           },
           {
             os: "linux-x86-n2-128",
             container: "us-central1-docker.pkg.dev/tensorflow-sigs/tensorflow/ml-build:latest",
             pretty_name: "XLA Linux x86 CPU with 128 vcpu",
-            bazel_arch_dir: "k8-opt"
+            bazel_arch_dir: "k8-opt",
             platform: "CPU"
           }
         ]
