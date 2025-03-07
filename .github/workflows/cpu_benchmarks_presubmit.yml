@@ -34,7 +34,7 @@ on:
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: ${{ github.ref != 'main' }}
-
+  
 jobs:
   Tests:
     strategy:
@@ -43,9 +43,9 @@ jobs:
       matrix:
         job_info: [
           {
-            pool: "linux-x86-n2-16",
+            os: "linux-x86-n2-16",
             container: "us-central1-docker.pkg.dev/tensorflow-sigs/tensorflow/ml-build:latest",
-            pretty_name: "XLA Linux x86 CPU 16 vcpu Presubmit",
+            pretty_name: "XLA Linux x86 CPU with 16 vcpu",
             bazel_arch_dir: "k8-opt"
             platform: "CPU"
           },
@@ -57,19 +57,12 @@ jobs:
             platform: "CPU"
           },
           {
-            pool: "linux-x86-n2-128",
+            os: "linux-x86-n2-128",
             container: "us-central1-docker.pkg.dev/tensorflow-sigs/tensorflow/ml-build:latest",
-            pretty_name: "XLA Linux x86 CPU 128 vcpu Presubmit",
+            pretty_name: "XLA Linux x86 CPU with 128 vcpu",
             bazel_arch_dir: "k8-opt"
             platform: "CPU"
-          },
-          {
-            pool: "linux-x86-g2-16-l4-1gpu",
-            container: "us-central1-docker.pkg.dev/tensorflow-sigs/tensorflow/ml-build:latest",
-            pretty_name: "XLA Linux x86 GPU T4 16 vcpu Presubmit",
-            bazel_arch_dir: "k8-opt"
-            platform: "GPU"
-          },
+          }
         ]
     name: ${{ matrix.job_info.pretty_name }}
     runs-on: ${{ matrix.job_info.pool }}
