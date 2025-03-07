@@ -15,7 +15,7 @@ on:
   pull_request:
   push:
     branches:
-      - main
+      - dev
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
@@ -36,9 +36,9 @@ jobs:
             platform: "CPU"
           },
           {
-            pool: "linux-arm64-c4a-16",
+            pool: "arc-linux-arm64-c4a-64-dev", #"linux-arm64-c4a-16",
             container: "us-central1-docker.pkg.dev/tensorflow-sigs/tensorflow/ml-build-arm64:latest",
-            pretty_name: "XLA Linux ARM64 CPU 16 vcpu Presubmit",
+            pretty_name: "XLA Linux ARM64 CPU DEV",
             bazel_arch_dir: "aarch64-opt",
             platform: "CPU"
           },
@@ -65,19 +65,24 @@ jobs:
         shell: bash
     timeout-minutes: 10
     steps:
-      - name: Print machine specs
-        run: |
-          lscpu
-          free -h  # Memory information
-          df -h    # Disk space information
-          uname -a # Kernel information
-
       - name: Checkout OpenXLA
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        
+      - name: Set up Google Cloud Authentication
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Install Google Cloud SDK
+        run: |
+          sudo apt-get update
+          sudo apt-get install google-cloud-sdk-common
+
 
       - name: "Run build.py"
         run: |
           ./build_tools/ci/build.py --build="${{ matrix.job_info.pretty_name }}_github_actions"
+            
 
       # Run the corresponding HLO tests based on platform
       - name: Run HLO tests
@@ -87,10 +92,14 @@ jobs:
           echo "Running test with binary: $binary_path"
           if [[ -x "$binary_path" ]]; then
             echo "Running test with binary: $binary_path"
-            if [[ ${{ matrix.job_info.platform }} == "CPU" ]]; then
-              $binary_path --input_format=hlo --reference_platform="" --platform="${{ matrix.job_info.platform }}" xla/tools/hlo_opt/tests/cpu_llvm.hlo
-            elif [[ ${{ matrix.job_info.platform }} == "GPU" ]]; then
-              $binary_path --input_format=hlo --reference_platform="" --platform="${{ matrix.job_info.platform }}" xla/tools/hlo_opt/tests/gpu_hlo_llvm.hlo
+            if [[ "${{ matrix.job_info.platform }}" == "CPU" ]]; then
+              output=$($binary_path --input_format=hlo --reference_platform="" --platform="${{ matrix.job_info.platform }}" xla/tools/hlo_opt/tests/cpu_llvm.hlo)
+              echo "$output" > output.txt
+              gsutil cp output.txt gs://juliagmt/cpu_llvm_hlo_test_output_${{ matrix.job_info.pool }}.txt
+            elif [[ "${{ matrix.job_info.platform }}" == "GPU" ]]; then
+              output=$($binary_path --input_format=hlo --reference_platform="" --platform="${{ matrix.job_info.platform }}" xla/tools/hlo_opt/tests/gpu_hlo_llvm.hlo)
+              echo "$output" > output.txt
+              gsutil cp output.txt gs://juliagmt/gpu_llvm_hlo_test_output_${{ matrix.job_info.pool }}.txt
             else
               echo "Unsupported platform: ${{ matrix.job_info.platform }}"
               exit 1
@@ -99,3 +108,4 @@ jobs:
             echo "Error: Binary not found at expected location: $binary_path"
             exit 1
           fi
+    
