@@ -68,16 +68,12 @@ jobs:
       - name: Checkout OpenXLA
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         
-      - name: Set up Google Cloud Authentication
-        uses: google-github-actions/auth@v1
-        with:
-          credentials_json: ${{ secrets.GCP_SA_KEY }}
-
-      - name: Install Google Cloud SDK
+      - name: Print Git Information
         run: |
-          sudo apt-get update
-          sudo apt-get install google-cloud-sdk-common
-
+          echo "Commit SHA: ${{ github.sha }}"
+          echo "Head SHA (PR): ${{ github.event.pull_request.head.sha }}"
+          echo "Head Branch (PR): ${{ github.head_ref }}"
+          echo "Pull Request Number: ${{ github.event.number }}"
 
       - name: "Run build.py"
         run: |
