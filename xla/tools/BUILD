@@ -766,6 +766,11 @@ cc_library(
     name = "compute_gpu_device_stats",
     srcs = ["compute_gpu_device_stats.cc"],
     hdrs = ["compute_gpu_device_stats.h"],
+    tags = [
+        "cuda-only",
+        "gpu",
+        "no_mac",
+    ],
     deps = [
         "//xla/tsl/platform:env",
         "//xla/tsl/platform:errors",
