@@ -770,6 +770,7 @@ cc_library(
         "cuda-only",
         "gpu",
         "no_mac",
+        "requires-gpu-sm75-only",
     ],
     deps = [
         "//xla/tsl/platform:env",
