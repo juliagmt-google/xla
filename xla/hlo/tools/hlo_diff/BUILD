@@ -69,6 +69,7 @@ cc_library(
     name = "hlo_diff_summary",
     srcs = ["hlo_diff_summary.cc"],
     hdrs = ["hlo_diff_summary.h"],
+    tags = ["skip_bazel"],
     deps = [
         ":hlo_diff_result",
         "//xla/hlo/ir:hlo",
