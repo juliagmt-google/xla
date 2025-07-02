@@ -108,6 +108,7 @@ cc_library(
     name = "hlo_gumgraph_diff",
     srcs = ["hlo_gumgraph_diff.cc"],
     hdrs = ["hlo_gumgraph_diff.h"],
+    tags = ["skip_bazel"],
     deps = [
         ":hlo_diff_eval",
         ":hlo_diff_result",
